@@ -10,7 +10,7 @@ import {
   CitizenCloseTicketInput,
   ReopenTicketInput,
   AuthContext,
-} from '@citizen-services/shared';
+} from './types';
 
 async function checkTicketAccess(ticketId: string, userID: string, role: string): Promise<any> {
   let whereClause = '';

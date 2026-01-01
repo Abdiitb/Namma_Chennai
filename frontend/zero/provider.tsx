@@ -24,8 +24,8 @@ interface ZeroProviderProps {
   children: ReactNode;
 }
 
-const API_BASE_URL = 'http://localhost:3000'; // Change to your LAN IP for device testing
-const ZERO_SERVER_URL = 'http://localhost:4848'; // Change to your LAN IP for device testing
+const API_BASE_URL = 'http://10.5.48.7:3000'; // Updated for mobile device testing
+const ZERO_SERVER_URL = 'http://10.5.48.7:4848'; // Updated for mobile device testing
 
 export function ZeroProvider({ children }: ZeroProviderProps) {
   const [zero, setZero] = useState<Zero | null>(null);

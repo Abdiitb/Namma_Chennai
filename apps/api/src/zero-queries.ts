@@ -1,4 +1,3 @@
-// Define queries locally to avoid module resolution issues
 import { defineQueries, defineQuery } from '@rocicorp/zero';
 import { z } from 'zod';
 import { zql } from './schema';

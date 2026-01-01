@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { Request, Response, NextFunction } from 'express';
-import { AuthContext, UserRole } from '@citizen-services/shared';
+import { AuthContext, UserRole } from './types';
 import { query } from './database';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-for-prototype';

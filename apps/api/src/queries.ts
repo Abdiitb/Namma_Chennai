@@ -1,5 +1,5 @@
 import { query } from './database';
-import { AuthContext } from '@citizen-services/shared';
+import { AuthContext } from './types';
 
 export async function getMyTickets(auth: AuthContext) {
   if (auth.role !== 'citizen') {

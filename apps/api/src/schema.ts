@@ -1,4 +1,3 @@
-// Define schema locally to ensure single instance
 import { createSchema, table, string, number, createBuilder } from '@rocicorp/zero';
 
 export const users = table('users')
