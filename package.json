@@ -1,7 +1,23 @@
 {
-  "dependencies": {
-    "@react-navigation/native": "^7.1.26",
-    "@rocicorp/zero": "^0.25.6",
-    "wa-sqlite": "^1.0.0"
+  "name": "citizen-services",
+  "version": "1.0.0",
+  "description": "Citizen Services App - Backend + Zero Cache Setup",
+  "private": true,
+  "scripts": {
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down && docker volume rm namma_chennai_postgres_data && docker compose up -d postgres && sleep 10 && cd apps/api && npm run migrate",
+    "dev:api": "cd apps/api && npm run dev",
+    "dev:zero": "cd apps/zero && npx zero-cache-dev --upstream-db postgresql://postgres:password@localhost:5432/citizen_services --port 4848",
+    "dev:frontend": "cd frontend && npm start",
+    "clean": "rm -rf apps/*/node_modules && rm -rf packages/*/node_modules && rm -rf frontend/node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }

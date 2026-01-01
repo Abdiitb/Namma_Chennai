@@ -1,13 +1,3 @@
-// zero/queries.ts
-import {defineQueries, defineQuery} from '@rocicorp/zero'
-import {z} from 'zod'
-import {zql} from './schema'
- 
-export const queries = defineQueries({
-  users: {
-    getUsers: defineQuery(
-      z.object({}),
-      ({ args }) => zql.user.orderBy('id'),
-    ),
-  },
-})
+// Use the shared queries and types from our backend
+export { ZERO_QUERIES } from '@citizen-services/shared';
+export * from '@citizen-services/shared';

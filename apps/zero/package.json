@@ -1,0 +1,13 @@
+{
+  "name": "@citizen-services/zero",
+  "version": "1.0.0",
+  "description": "Zero cache configuration",
+  "scripts": {
+    "dev": "npx zero-cache-dev --config zero.config.js",
+    "start": "npx zero-cache-dev --config zero.config.js"
+  },
+  "dependencies": {
+    "@citizen-services/shared": "*",
+    "@rocicorp/zero": "^0.25.6"
+  }
+}
