@@ -1,4 +1,4 @@
-import { createSchema, table, string, number, createBuilder } from '@rocicorp/zero';
+import { createSchema, table, string, number, createBuilder, definePermissions, ANYONE_CAN_DO_ANYTHING } from '@rocicorp/zero';
 
 export const users = table('users')
   .columns({
@@ -79,3 +79,11 @@ export const schema = createSchema({
 });
 
 export const zql = createBuilder(schema);
+
+export const permissions = definePermissions<unknown, typeof schema>(schema, () => ({
+  users: ANYONE_CAN_DO_ANYTHING,
+  staff_profiles: ANYONE_CAN_DO_ANYTHING,
+  tickets: ANYONE_CAN_DO_ANYTHING,
+  ticket_events: ANYONE_CAN_DO_ANYTHING,
+  ticket_attachments: ANYONE_CAN_DO_ANYTHING,
+}));

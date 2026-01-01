@@ -1,7 +1,13 @@
-// Define queries locally to avoid module resolution issues
+// Define queries locally to avoid module resolution issues  
 import { defineQueries, defineQuery } from '@rocicorp/zero';
 import { z } from 'zod';
 import { zql } from './schema';
+
+// Try simple direct queries without parameters first
+export const simpleQueries = {
+  allTickets: zql.tickets,
+  allUsers: zql.users,
+};
 
 export const ZERO_QUERIES = defineQueries({
   myTickets: defineQuery(

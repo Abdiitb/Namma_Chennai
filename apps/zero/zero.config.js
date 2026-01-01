@@ -15,6 +15,7 @@ module.exports = {
   replication: {
     logLevel: 'info',
   },
-  mutateUrl: ['http://192.168.1.102:3000/api/*'],
-  queryUrl: ['http://192.168.1.102:3000/api/*'],
+  // Set mutate and query URLs to bypass authentication
+  mutateUrl: 'http://localhost:3000/api/*',
+  queryUrl: 'http://localhost:3000/api/*',
 };

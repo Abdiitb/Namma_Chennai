@@ -62,23 +62,32 @@ export function ZeroProvider({ children }: ZeroProviderProps) {
       console.log('Creating Zero instance with:', {
         server: ZERO_SERVER_URL,
         hasSchema: !!schema,
-        auth: token || 'anonymous',
-        userID: currentUser?.id || 'anonymous'
+        userID: currentUser?.id || 'anonymous',
+        schemaKeys: Object.keys(schema.tables)
       });
 
       const zeroInstance = new Zero({
         server: ZERO_SERVER_URL,
         schema,
         kvStore: expoSQLiteStoreProvider(),
-        auth: token || 'anonymous',
         userID: currentUser?.id || 'anonymous-user',
       });
 
-      console.log('Zero instance created:', zeroInstance);
+      console.log('Zero instance created successfully');
+      console.log('Zero instance properties:', {
+        userID: zeroInstance.userID,
+        availableProperties: Object.getOwnPropertyNames(zeroInstance)
+      });
+      
+      // Add some delay for connection establishment
+      console.log('Waiting for Zero initialization...');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
       setZero(zeroInstance);
     } catch (error) {
       console.error('Failed to initialize Zero:', error);
       console.error('Error details:', error instanceof Error ? error.message : String(error));
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack available');
     }
   }
 

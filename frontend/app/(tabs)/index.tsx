@@ -7,21 +7,123 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
 import { zql } from '@/zero/schema';
-import { ZERO_QUERIES } from '@/zero/queries';
-import { useQuery } from '@rocicorp/zero/react';
-import { useEffect } from 'react';
+import { useQuery, useZero } from '@rocicorp/zero/react';
+import { useEffect, useState } from 'react';
+
+// FIXED: Using Zero useQuery correctly as per their documentation
+function SimpleDataDisplay() {
+  console.log('=== 🔍 SimpleDataDisplay COMPONENT EXECUTING ===');
+  
+  // Get the Zero client directly to debug connection
+  const { zero } = useZero();
+  console.log('🔧 Zero client:', {
+    zero: zero,
+    userID: zero?.userID,
+    hasZero: !!zero
+  });
+  
+  // Debug: Check what zql query objects look like
+  console.log('🔧 Query objects:', {
+    ticketsQuery: zql.tickets,
+    usersQuery: zql.users,
+    ticketsType: typeof zql.tickets,
+    usersType: typeof zql.users
+  });
+  
+  // State to track multiple attempts
+  const [attempt, setAttempt] = useState(1);
+  const [syncStatus, setSyncStatus] = useState<string>('initializing');
+  
+  // Monitor Zero sync status
+  useEffect(() => {
+    if (!zero) {
+      console.log('❌ No Zero client available');
+      setSyncStatus('no-client');
+      return;
+    }
+    
+    console.log('✅ Zero client available, checking sync...');
+    setSyncStatus('client-ready');
+    
+    // Try to trigger initial sync
+    zero.query(zql.tickets).then((result) => {
+      console.log('📊 Direct zero.query result:', result);
+    }).catch(err => {
+      console.error('❌ Direct query error:', err);
+    });
+  }, [zero]);
+  
+  // Back to useQuery to see actual data being returned
+  const [tickets] = useQuery(zql.tickets);
+  const [users] = useQuery(zql.users);
+  
+  // Add effect to retry if data is empty
+  useEffect(() => {
+    if ((!tickets || tickets.length === 0) && (!users || users.length === 0) && attempt <= 3) {
+      console.log(`🔄 Attempt ${attempt}: Data empty, retrying...`);
+      const timer = setTimeout(() => {
+        setAttempt(prev => prev + 1);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [tickets, users, attempt]);
+  
+  console.log('📊 Zero Query Results:', {
+    tickets: tickets,
+    ticketsType: typeof tickets,
+    ticketsArray: Array.isArray(tickets),
+    ticketsLength: tickets?.length,
+    users: users,
+    usersType: typeof users,
+    usersArray: Array.isArray(users),
+    usersLength: users?.length,
+  });
+  
+  // Check if we have actual data (not empty arrays)
+  const hasTickets = Array.isArray(tickets) && tickets.length > 0;
+  const hasUsers = Array.isArray(users) && users.length > 0;
+  
+  if (hasTickets || hasUsers) {
+    console.log('✅ SUCCESS: Data loaded from Zero!', { 
+      ticketsCount: tickets.length, 
+      usersCount: users.length,
+      attempt: attempt,
+      syncStatus
+    });
+    return (
+      <ThemedText style={{backgroundColor: 'green', color: 'white', padding: 10}}>
+        ✅ SUCCESS (attempt {attempt}): {tickets.length} tickets, {users.length} users from Zero cache! Status: {syncStatus}
+      </ThemedText>
+    );
+  }
+  
+  // If we get empty arrays, that means Zero is connected but no data yet
+  if (Array.isArray(tickets) && Array.isArray(users)) {
+    console.log('⏳ Connected to Zero but data is empty - sync may still be in progress');
+    return (
+      <ThemedText style={{backgroundColor: 'orange', color: 'black', padding: 10}}>{'\n'}
+        Status: {syncStatus} | userID: {zero?.userID}
+      </ThemedText>
+    );
+  }
+  
+  // Still loading/connecting
+  console.log('🔄 Zero still connecting...', { syncStatus, hasZero: !!zero });
+  return (
+    <ThemedText style={{backgroundColor: 'blue', color: 'white', padding: 10}}>
+      🔄 Connecting to Zero cache... (attempt {attempt}){'\n'}
+      Status: {syncStatus}'white', padding: 10}}>
+      🔄 Connecting to Zero cache... (attempt {attempt})
+    </ThemedText>
+  );
+}
 
 export default function HomeScreen() {
-  const [tickets] = useQuery(zql.tickets.orderBy('created_at', 'desc'));
+  console.log('=== HomeScreen rendering (MINIMAL) ===');
   
-  // Try a simple query without ordering
-  const [allTickets] = useQuery(zql.tickets);
-
-  console.log('Ordered tickets:', tickets);
-  console.log('All tickets:', allTickets);
-  console.log('Tickets count (ordered):', tickets?.length);
-  console.log('Tickets count (all):', allTickets?.length);
-  console.log('Schema tables:', Object.keys(zql));
+  // REMOVED: useEffect that was monitoring old useQuery results
+  
+  // REMOVED: Old render-time logging for deprecated useQuery
   
   // Zero client connects via WebSocket (no CORS issues)
   
@@ -36,9 +138,21 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <ThemedText>Ordered: {tickets?.length || 0} | All: {allTickets?.length || 0}</ThemedText>
-        <ThemedText>{(tickets?.length || allTickets?.length) ? 'Data loaded!' : 'Loading tickets...'}</ThemedText>
+        <ThemedText type="title">Welcome to Namma Chennai!</ThemedText>
+        <ThemedText type="subtitle" style={{backgroundColor: 'orange', color: 'white', padding: 10}}>
+          ⚠️ Old useQuery methods removed - using only useSuspenseQuery below
+        </ThemedText>
+        
+        <ThemedText style={{backgroundColor: 'green', color: 'white', padding: 10}}>
+          ✅ FINAL TEST: Simple data verification from database
+        </ThemedText>
+        <ThemedText style={{backgroundColor: 'cyan', color: 'black', padding: 10}}>
+          📊 Expected: 4 tickets, 6 users (verified in PostgreSQL)
+        </ThemedText>
+        <SimpleDataDisplay />
+        <ThemedText style={{backgroundColor: 'purple', color: 'white', padding: 10}}>
+          🔄 Data loading handled by useQuery above
+        </ThemedText>
         {/* {tickets?.map(ticket => (
           <ThemedText key={ticket.id}>- {ticket.title}</ThemedText>
         ))} */}

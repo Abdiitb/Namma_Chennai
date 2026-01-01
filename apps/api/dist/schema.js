@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.zql = exports.schema = exports.ticket_attachments = exports.ticket_events = exports.tickets = exports.staff_profiles = exports.users = void 0;
+exports.permissions = exports.zql = exports.schema = exports.ticket_attachments = exports.ticket_events = exports.tickets = exports.staff_profiles = exports.users = void 0;
 const zero_1 = require("@rocicorp/zero");
 exports.users = (0, zero_1.table)('users')
     .columns({
@@ -73,48 +73,13 @@ exports.schema = (0, zero_1.createSchema)({
         exports.ticket_events,
         exports.ticket_attachments,
     ],
-    permissions: {
-        users: {
-            row: {
-                select: [['allow', true]],
-                insert: [['allow', true]],
-                update: [['allow', true]],
-                delete: [['allow', true]]
-            }
-        },
-        staff_profiles: {
-            row: {
-                select: [['allow', true]],
-                insert: [['allow', true]],
-                update: [['allow', true]],
-                delete: [['allow', true]]
-            }
-        },
-        tickets: {
-            row: {
-                select: [['allow', true]],
-                insert: [['allow', true]],
-                update: [['allow', true]],
-                delete: [['allow', true]]
-            }
-        },
-        ticket_events: {
-            row: {
-                select: [['allow', true]],
-                insert: [['allow', true]],
-                update: [['allow', true]],
-                delete: [['allow', true]]
-            }
-        },
-        ticket_attachments: {
-            row: {
-                select: [['allow', true]],
-                insert: [['allow', true]],
-                update: [['allow', true]],
-                delete: [['allow', true]]
-            }
-        }
-    }
 });
 exports.zql = (0, zero_1.createBuilder)(exports.schema);
+exports.permissions = (0, zero_1.definePermissions)(exports.schema, () => ({
+    users: zero_1.ANYONE_CAN_DO_ANYTHING,
+    staff_profiles: zero_1.ANYONE_CAN_DO_ANYTHING,
+    tickets: zero_1.ANYONE_CAN_DO_ANYTHING,
+    ticket_events: zero_1.ANYONE_CAN_DO_ANYTHING,
+    ticket_attachments: zero_1.ANYONE_CAN_DO_ANYTHING,
+}));
 //# sourceMappingURL=schema.js.map

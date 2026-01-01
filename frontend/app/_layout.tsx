@@ -12,9 +12,10 @@ import { schema } from '../zero/schema';
 const opts: ZeroOptions = {
   schema,
   userID: 'local-dev-user',
-  auth: 'anonymous',
   // Use localhost on web to avoid CORS, network IP on native for device testing
   server: Platform.OS === 'web' ? 'http://localhost:4848' : 'http://192.168.1.102:4848',
+  // Add explicit logging
+  logLevel: 'debug',
 }
 
 export const unstable_settings = {
@@ -23,6 +24,11 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
+  console.log('=== RootLayout ZeroProvider Setup ===');
+  console.log('Platform.OS:', Platform.OS);
+  console.log('Zero options:', opts);
+  console.log('KV Store:', Platform.OS !== 'web' ? 'expo-sqlite' : 'idb');
 
   return (
     <ZeroProvider
