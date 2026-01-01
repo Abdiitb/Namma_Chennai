@@ -1,4 +1,4 @@
-const { schema } = require('@citizen-services/shared');
+const { schema } = require('../api/dist/schema');
 
 module.exports = {
   schema,
