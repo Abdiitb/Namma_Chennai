@@ -9,7 +9,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const auth_1 = require("./auth");
-const shared_1 = require("@citizen-services/shared");
+const zero_queries_1 = require("./zero-queries");
 const queries_1 = require("./queries");
 const mutators_1 = require("./mutators");
 dotenv_1.default.config();
@@ -116,7 +116,7 @@ app.post('/api/zero/mutate', auth_1.authMiddleware, async (req, res) => {
 // For debugging: list all available queries
 app.get('/api/zero/available-queries', (req, res) => {
     res.json({
-        queries: Object.keys(shared_1.ZERO_QUERIES),
+        queries: Object.keys(zero_queries_1.ZERO_QUERIES),
         mutators: [
             'createTicket',
             'assignTicket',
