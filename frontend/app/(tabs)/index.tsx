@@ -7,12 +7,14 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
 import { useZero, useQuery } from '@rocicorp/zero/react'
-import { ZERO_QUERIES } from '@/zero/queries'
+import { zql } from '@/zero/schema'
 
 export default function HomeScreen() {
   const zero = useZero()
   const [tickets] = useQuery(
-    ZERO_QUERIES.myTickets, { userID: 'user_1' }
+    zql.tickets
+      .where('created_by', 'user_1')
+      .orderBy('created_at', 'desc')
   )
 
   return (

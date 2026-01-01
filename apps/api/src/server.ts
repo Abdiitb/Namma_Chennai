@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { authMiddleware, loginUser, AuthenticatedRequest } from './auth';
-import { ZERO_QUERIES } from '@citizen-services/shared';
+import { ZERO_QUERIES } from './zero-queries';
 import {
   getMyTickets,
   getAssignedTickets,
