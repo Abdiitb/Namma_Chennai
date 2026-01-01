@@ -8,16 +8,13 @@ module.exports = {
   server: {
     port: parseInt(process.env.ZERO_CACHE_PORT) || 4848,
     cors: {
-      origin: ['http://localhost:8081', 'http://localhost:19006', 'http://localhost:3000'],
+      origin: ['http://localhost:8081', 'http://localhost:19006', 'http://localhost:3000', 'http://192.168.1.102:8081', 'http://192.168.1.102:19006', 'http://192.168.1.102:3000'],
       credentials: true,
     },
-  },
-  auth: {
-    secret: process.env.ZERO_AUTH_SECRET || 'your-auth-secret-key-here',
-    endpoint: 'http://localhost:3000/api/zero',
-    allowAnonymous: true,
   },
   replication: {
     logLevel: 'info',
   },
+  mutateUrl: ['http://192.168.1.102:3000/api/*'],
+  queryUrl: ['http://192.168.1.102:3000/api/*'],
 };

@@ -6,21 +6,24 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
-import { useZero, useQuery } from '@rocicorp/zero/react'
 import { zql } from '@/zero/schema';
 import { ZERO_QUERIES } from '@/zero/queries';
+import { useQuery } from '@rocicorp/zero/react';
+import { useEffect } from 'react';
 
 export default function HomeScreen() {
-  const zero = useZero()
-  const [tickets] = useQuery(
-    zql.tickets.orderBy('created_at', 'desc')
-  )
+  const [tickets] = useQuery(zql.tickets.orderBy('created_at', 'desc'));
+  
+  // Try a simple query without ordering
+  const [allTickets] = useQuery(zql.tickets);
 
-  console.log('Tickets:', tickets);
-  console.log('Zero instance:', zero);
-  console.log('Zero type:', typeof zero);
-  console.log('Zero keys:', zero ? Object.keys(zero) : 'null');
-  console.log('Zero clientID:', zero.clientID);
+  console.log('Ordered tickets:', tickets);
+  console.log('All tickets:', allTickets);
+  console.log('Tickets count (ordered):', tickets?.length);
+  console.log('Tickets count (all):', allTickets?.length);
+  console.log('Schema tables:', Object.keys(zql));
+  
+  // Zero client connects via WebSocket (no CORS issues)
   
 
   return (
@@ -33,8 +36,9 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome! {zero.clientID}</ThemedText>
-        <ThemedText>{tickets ? `Tickets count: ${tickets.length}` : 'Loading tickets...'}</ThemedText>
+        <ThemedText type="title">Welcome!</ThemedText>
+        <ThemedText>Ordered: {tickets?.length || 0} | All: {allTickets?.length || 0}</ThemedText>
+        <ThemedText>{(tickets?.length || allTickets?.length) ? 'Data loaded!' : 'Loading tickets...'}</ThemedText>
         {/* {tickets?.map(ticket => (
           <ThemedText key={ticket.id}>- {ticket.title}</ThemedText>
         ))} */}

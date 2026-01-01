@@ -12,8 +12,9 @@ import { schema } from '../zero/schema';
 const opts: ZeroOptions = {
   schema,
   userID: 'local-dev-user',
-  // cacheURL removed - using local-only storage for development
-  server: Platform.OS === 'web' ? 'http://localhost:4848' : 'http://10.5.48.7:4848',
+  auth: 'anonymous',
+  // Use localhost on web to avoid CORS, network IP on native for device testing
+  server: Platform.OS === 'web' ? 'http://localhost:4848' : 'http://192.168.1.102:4848',
 }
 
 export const unstable_settings = {

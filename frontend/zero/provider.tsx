@@ -33,8 +33,8 @@ interface ZeroProviderProps {
   children: ReactNode;
 }
 
-const API_BASE_URL = 'http://localhost:3000'; // Updated for mobile device testing
-const ZERO_SERVER_URL = 'http://localhost:4848'; // Updated for mobile device testing
+const API_BASE_URL = 'http://192.168.1.102:3000'; // Updated for mobile device testing
+const ZERO_SERVER_URL = 'http://192.168.1.102:4848'; // Updated for mobile device testing
 
 export function ZeroProvider({ children }: ZeroProviderProps) {
   const [zero, setZero] = useState<ZeroInstance | null>(null);
@@ -47,6 +47,8 @@ export function ZeroProvider({ children }: ZeroProviderProps) {
 
   async function initializeZero() {
     try {
+      console.log('Initializing Zero with server:', ZERO_SERVER_URL);
+      
       const token = await AsyncStorage.getItem('auth_token');
       const userData = await AsyncStorage.getItem('user_data');
       
@@ -57,17 +59,26 @@ export function ZeroProvider({ children }: ZeroProviderProps) {
         setUser(currentUser);
       }
 
+      console.log('Creating Zero instance with:', {
+        server: ZERO_SERVER_URL,
+        hasSchema: !!schema,
+        auth: token || 'anonymous',
+        userID: currentUser?.id || 'anonymous'
+      });
+
       const zeroInstance = new Zero({
         server: ZERO_SERVER_URL,
         schema,
         kvStore: expoSQLiteStoreProvider(),
-        auth: token || '',
-        userID: currentUser?.id || '',
+        auth: token || 'anonymous',
+        userID: currentUser?.id || 'anonymous-user',
       });
 
+      console.log('Zero instance created:', zeroInstance);
       setZero(zeroInstance);
     } catch (error) {
       console.error('Failed to initialize Zero:', error);
+      console.error('Error details:', error instanceof Error ? error.message : String(error));
     }
   }
 

@@ -10,7 +10,7 @@ exports.users = (0, zero_1.table)('users')
     phone: (0, zero_1.string)().optional(),
     email: (0, zero_1.string)().optional(),
     password_hash: (0, zero_1.string)(),
-    created_at: (0, zero_1.string)(),
+    created_at: (0, zero_1.number)(),
 })
     .primaryKey('id');
 exports.staff_profiles = (0, zero_1.table)('staff_profiles')
@@ -36,9 +36,9 @@ exports.tickets = (0, zero_1.table)('tickets')
     current_supervisor: (0, zero_1.string)().optional(),
     citizen_rating: (0, zero_1.number)().optional(),
     citizen_feedback: (0, zero_1.string)().optional(),
-    created_at: (0, zero_1.string)(),
-    updated_at: (0, zero_1.string)(),
-    closed_at: (0, zero_1.string)().optional(),
+    created_at: (0, zero_1.number)(),
+    updated_at: (0, zero_1.number)(),
+    closed_at: (0, zero_1.number)().optional(),
 })
     .primaryKey('id');
 exports.ticket_events = (0, zero_1.table)('ticket_events')
@@ -50,7 +50,7 @@ exports.ticket_events = (0, zero_1.table)('ticket_events')
     from_status: (0, zero_1.string)().optional(),
     to_status: (0, zero_1.string)().optional(),
     message: (0, zero_1.string)().optional(),
-    created_at: (0, zero_1.string)(),
+    created_at: (0, zero_1.number)(),
 })
     .primaryKey('id');
 exports.ticket_attachments = (0, zero_1.table)('ticket_attachments')
@@ -62,7 +62,7 @@ exports.ticket_attachments = (0, zero_1.table)('ticket_attachments')
     url: (0, zero_1.string)(),
     mime_type: (0, zero_1.string)().optional(),
     caption: (0, zero_1.string)().optional(),
-    created_at: (0, zero_1.string)(),
+    created_at: (0, zero_1.number)(),
 })
     .primaryKey('id');
 exports.schema = (0, zero_1.createSchema)({
@@ -73,6 +73,48 @@ exports.schema = (0, zero_1.createSchema)({
         exports.ticket_events,
         exports.ticket_attachments,
     ],
+    permissions: {
+        users: {
+            row: {
+                select: [['allow', true]],
+                insert: [['allow', true]],
+                update: [['allow', true]],
+                delete: [['allow', true]]
+            }
+        },
+        staff_profiles: {
+            row: {
+                select: [['allow', true]],
+                insert: [['allow', true]],
+                update: [['allow', true]],
+                delete: [['allow', true]]
+            }
+        },
+        tickets: {
+            row: {
+                select: [['allow', true]],
+                insert: [['allow', true]],
+                update: [['allow', true]],
+                delete: [['allow', true]]
+            }
+        },
+        ticket_events: {
+            row: {
+                select: [['allow', true]],
+                insert: [['allow', true]],
+                update: [['allow', true]],
+                delete: [['allow', true]]
+            }
+        },
+        ticket_attachments: {
+            row: {
+                select: [['allow', true]],
+                insert: [['allow', true]],
+                update: [['allow', true]],
+                delete: [['allow', true]]
+            }
+        }
+    }
 });
 exports.zql = (0, zero_1.createBuilder)(exports.schema);
 //# sourceMappingURL=schema.js.map
