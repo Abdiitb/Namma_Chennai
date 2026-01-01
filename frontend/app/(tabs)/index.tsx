@@ -7,15 +7,21 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
 import { useZero, useQuery } from '@rocicorp/zero/react'
-import { zql } from '@/zero/schema'
+import { zql } from '@/zero/schema';
+import { ZERO_QUERIES } from '@/zero/queries';
 
 export default function HomeScreen() {
   const zero = useZero()
   const [tickets] = useQuery(
-    zql.tickets
-      .where('created_by', 'user_1')
-      .orderBy('created_at', 'desc')
+    zql.tickets.orderBy('created_at', 'desc')
   )
+
+  console.log('Tickets:', tickets);
+  console.log('Zero instance:', zero);
+  console.log('Zero type:', typeof zero);
+  console.log('Zero keys:', zero ? Object.keys(zero) : 'null');
+  console.log('Zero clientID:', zero.clientID);
+  
 
   return (
     <ParallaxScrollView
@@ -29,9 +35,9 @@ export default function HomeScreen() {
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Welcome! {zero.clientID}</ThemedText>
         <ThemedText>{tickets ? `Tickets count: ${tickets.length}` : 'Loading tickets...'}</ThemedText>
-        {tickets?.map(ticket => (
+        {/* {tickets?.map(ticket => (
           <ThemedText key={ticket.id}>- {ticket.title}</ThemedText>
-        ))}
+        ))} */}
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>

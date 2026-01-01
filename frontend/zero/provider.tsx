@@ -1,15 +1,24 @@
 import React, { ReactNode, useState, useEffect } from 'react';
-import { Zero, createZero } from '@rocicorp/zero';
+import { Zero } from '@rocicorp/zero';
 import { expoSQLiteStoreProvider } from '@rocicorp/zero/expo-sqlite';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { schema } from './schema';
 
+type ZeroInstance = Zero<typeof schema>;
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+}
+
 interface ZeroContextType {
-  zero: Zero | null;
+  zero: ZeroInstance | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  user: any;
+  user: User | null;
 }
 
 const ZeroContext = React.createContext<ZeroContextType>({
@@ -24,13 +33,13 @@ interface ZeroProviderProps {
   children: ReactNode;
 }
 
-const API_BASE_URL = 'http://10.5.48.7:3000'; // Updated for mobile device testing
-const ZERO_SERVER_URL = 'http://10.5.48.7:4848'; // Updated for mobile device testing
+const API_BASE_URL = 'http://localhost:3000'; // Updated for mobile device testing
+const ZERO_SERVER_URL = 'http://localhost:4848'; // Updated for mobile device testing
 
 export function ZeroProvider({ children }: ZeroProviderProps) {
-  const [zero, setZero] = useState<Zero | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+  const [zero, setZero] = useState<ZeroInstance | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     initializeZero();
@@ -41,20 +50,19 @@ export function ZeroProvider({ children }: ZeroProviderProps) {
       const token = await AsyncStorage.getItem('auth_token');
       const userData = await AsyncStorage.getItem('user_data');
       
+      let currentUser: User | null = null;
       if (token && userData) {
         setIsAuthenticated(true);
-        setUser(JSON.parse(userData));
+        currentUser = JSON.parse(userData);
+        setUser(currentUser);
       }
 
-      const zeroInstance = createZero({
+      const zeroInstance = new Zero({
         server: ZERO_SERVER_URL,
         schema,
         kvStore: expoSQLiteStoreProvider(),
-        auth: async () => {
-          const authToken = await AsyncStorage.getItem('auth_token');
-          return authToken || '';
-        },
-        userID: user?.id || '',
+        auth: token || '',
+        userID: currentUser?.id || '',
       });
 
       setZero(zeroInstance);
