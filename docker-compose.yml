@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: citizen_services_db
+    environment:
+      POSTGRES_DB: citizen_services
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    command: postgres -c wal_level=logical -c max_replication_slots=10 -c max_wal_senders=10
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d citizen_services"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
