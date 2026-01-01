@@ -12,8 +12,8 @@ import { queries } from '@/zero/queries'
 
 export default function HomeScreen() {
   const zero = useZero()
-  const [albums] = useQuery(
-    queries.albums.byArtist({ artistID: 'artist_1' })
+  const [users] = useQuery(
+    queries.users.getUsers({})
   )
 
   return (
@@ -27,12 +27,12 @@ export default function HomeScreen() {
       }>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Welcome! {zero.clientID}</ThemedText>
-        <ThemedText>{albums ? `Albums count: ${albums.length}` : 'Loading albums...'}</ThemedText>
-        {albums.map(album => (
+        <ThemedText>{users ? `Users count: ${users.length}` : 'Loading users...'}</ThemedText>
+        {users.map(user => (
           <>
-            <ThemedText key={album.id}>- {album.id}</ThemedText>
-            <ThemedText key={album.name}>- {album.name}</ThemedText>
-            <ThemedText key={album.email}>- {album.email}</ThemedText>
+            <ThemedText key={user.id}>- {user.id}</ThemedText>
+            <ThemedText key={user.name}>- {user.name}</ThemedText>
+            <ThemedText key={user.email}>- {user.email}</ThemedText>
           </>
         ))}
         <HelloWave />

@@ -4,12 +4,10 @@ import {z} from 'zod'
 import {zql} from './schema'
  
 export const queries = defineQueries({
-  albums: {
-    byArtist: defineQuery(
-      z.object({artistID: z.string()}),
-      ({args: {artistID}}) =>
-        zql.user
-            .where('id', artistID),
-    )
-  }
+  users: {
+    getUsers: defineQuery(
+      z.object({}),
+      ({ args }) => zql.user.orderBy('id'),
+    ),
+  },
 })
