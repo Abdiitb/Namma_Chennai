@@ -1,33 +1,28 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ZERO_QUERIES = void 0;
-exports.ZERO_QUERIES = {
-    myTickets: `
-    SELECT * FROM tickets 
-    WHERE created_by = $userID 
-    ORDER BY created_at DESC
-  `,
-    assignedTickets: `
-    SELECT * FROM tickets 
-    WHERE assigned_to = $userID 
-    ORDER BY updated_at DESC
-  `,
-    supervisorQueue: `
-    SELECT * FROM tickets 
-    WHERE current_supervisor = $userID 
-    AND status = 'waiting_supervisor'
-    ORDER BY updated_at ASC
-  `,
-    ticketDetail: `
-    SELECT 
-      t.*,
-      json_agg(DISTINCT e.*) FILTER (WHERE e.id IS NOT NULL) ORDER BY e.created_at ASC as events,
-      json_agg(DISTINCT a.*) FILTER (WHERE a.id IS NOT NULL) ORDER BY a.created_at ASC as attachments
-    FROM tickets t
-    LEFT JOIN ticket_events e ON t.id = e.ticket_id
-    LEFT JOIN ticket_attachments a ON t.id = a.ticket_id
-    WHERE t.id = $ticketId
-    GROUP BY t.id
-  `,
-};
+const zero_1 = require("@rocicorp/zero");
+const zod_1 = require("zod");
+const schema_1 = require("./schema");
+exports.ZERO_QUERIES = (0, zero_1.defineQueries)({
+    myTickets: (0, zero_1.defineQuery)(zod_1.z.object({
+        userID: zod_1.z.string(),
+    }), ({ args: { userID } }) => schema_1.zql.tickets
+        .where('created_by', userID)
+        .orderBy('created_at', 'desc')),
+    assignedTickets: (0, zero_1.defineQuery)(zod_1.z.object({
+        userID: zod_1.z.string(),
+    }), ({ args: { userID } }) => schema_1.zql.tickets
+        .where('assigned_to', userID)
+        .orderBy('updated_at', 'desc')),
+    supervisorQueue: (0, zero_1.defineQuery)(zod_1.z.object({
+        userID: zod_1.z.string(),
+    }), ({ args: { userID } }) => schema_1.zql.tickets
+        .where('current_supervisor', userID)
+        .where('status', 'waiting_supervisor')
+        .orderBy('updated_at', 'asc')),
+    ticketDetail: (0, zero_1.defineQuery)(zod_1.z.object({
+        ticketId: zod_1.z.string(),
+    }), ({ args: { ticketId } }) => schema_1.zql.tickets.where('id', ticketId)),
+});
 //# sourceMappingURL=queries.js.map

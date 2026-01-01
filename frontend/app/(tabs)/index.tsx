@@ -6,14 +6,13 @@ import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Link } from 'expo-router';
-import { useZero } from '@rocicorp/zero/react'
-import { useQuery } from '@rocicorp/zero/react'
-import { queries } from '@/zero/queries'
+import { useZero, useQuery } from '@rocicorp/zero/react'
+import { ZERO_QUERIES } from '@/zero/queries'
 
 export default function HomeScreen() {
   const zero = useZero()
-  const [albums] = useQuery(
-    queries.albums.byArtist({ artistID: 'artist_1' })
+  const [tickets] = useQuery(
+    ZERO_QUERIES.myTickets, { userID: 'user_1' }
   )
 
   return (
@@ -27,13 +26,9 @@ export default function HomeScreen() {
       }>
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Welcome! {zero.clientID}</ThemedText>
-        <ThemedText>{albums ? `Albums count: ${albums.length}` : 'Loading albums...'}</ThemedText>
-        {albums.map(album => (
-          <>
-            <ThemedText key={album.id}>- {album.id}</ThemedText>
-            <ThemedText key={album.name}>- {album.name}</ThemedText>
-            <ThemedText key={album.email}>- {album.email}</ThemedText>
-          </>
+        <ThemedText>{tickets ? `Tickets count: ${tickets.length}` : 'Loading tickets...'}</ThemedText>
+        {tickets?.map(ticket => (
+          <ThemedText key={ticket.id}>- {ticket.title}</ThemedText>
         ))}
         <HelloWave />
       </ThemedView>
