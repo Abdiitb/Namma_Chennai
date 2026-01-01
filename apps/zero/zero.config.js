@@ -15,6 +15,7 @@ module.exports = {
   auth: {
     secret: process.env.ZERO_AUTH_SECRET || 'your-auth-secret-key-here',
     endpoint: 'http://localhost:3000/api/zero',
+    allowAnonymous: true,
   },
   replication: {
     logLevel: 'info',

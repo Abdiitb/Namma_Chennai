@@ -8,7 +8,7 @@ export const users = table('users')
     phone: string().optional(),
     email: string().optional(),
     password_hash: string(),
-    created_at: string(),
+    created_at: number(),
   })
   .primaryKey('id');
 
@@ -36,9 +36,9 @@ export const tickets = table('tickets')
     current_supervisor: string().optional(),
     citizen_rating: number().optional(),
     citizen_feedback: string().optional(),
-    created_at: string(),
-    updated_at: string(),
-    closed_at: string().optional(),
+    created_at: number(),
+    updated_at: number(),
+    closed_at: number().optional(),
   })
   .primaryKey('id');
 
@@ -51,7 +51,7 @@ export const ticket_events = table('ticket_events')
     from_status: string().optional(),
     to_status: string().optional(),
     message: string().optional(),
-    created_at: string(),
+    created_at: number(),
   })
   .primaryKey('id');
 
@@ -64,7 +64,7 @@ export const ticket_attachments = table('ticket_attachments')
     url: string(),
     mime_type: string().optional(),
     caption: string().optional(),
-    created_at: string(),
+    created_at: number(),
   })
   .primaryKey('id');
 
