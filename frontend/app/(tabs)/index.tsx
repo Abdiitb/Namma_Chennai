@@ -10,7 +10,7 @@ import { ThemedView } from '@/components/themed-view';
 import { ZERO_QUERIES } from '@/zero/queries';
 import { useQuery } from '@rocicorp/zero/react';
 
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = Platform.OS === 'web' ? 'http://localhost:3000' : 'http://10.5.48.28:3000';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -22,7 +22,7 @@ export default function LoginScreen() {
   // Use the defined query instead of raw ZQL
   const [tickets] = useQuery(ZERO_QUERIES.allTickets());
 
-  console.log('Fetched tickets:', tickets);
+  // console.log('Fetched tickets:', tickets);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -66,10 +66,10 @@ export default function LoginScreen() {
     return (
       <ThemedView style={styles.container}>
         <Header title="Namma Chennai" subtitle="Citizen Services Portal" />
-        
+
         <Card style={styles.userCard}>
           <ThemedText style={styles.welcomeText}>Welcome, {user.name}!</ThemedText>
-          
+
           <View style={styles.userInfo}>
             <ThemedText style={styles.infoLabel}>Email</ThemedText>
             <ThemedText style={styles.infoValue}>{user.email}</ThemedText>
@@ -82,10 +82,29 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          <Button 
-            title="Logout" 
-            onPress={handleLogout} 
-            variant="danger" 
+          {tickets.length > 0 && (
+            <>
+              <View style={styles.userInfo}>
+                <ThemedText style={styles.infoLabel}>You have {tickets.length} tickets in the system.</ThemedText>
+              </View>
+
+              <View>
+                <ThemedText style={styles.infoLabel}>Ticket Details:</ThemedText>
+                {tickets.map((ticket: any) => (
+                  <View key={ticket.id}>
+                    <ThemedText style={styles.infoValue}>Ticket Title: {ticket.title}</ThemedText>
+                    <ThemedText style={styles.infoValue}>- {ticket.address_text || 'No Title'}</ThemedText>
+                    <ThemedText style={styles.infoValue}>  Status: {ticket.status}</ThemedText>
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
+
+          <Button
+            title="Logout"
+            onPress={handleLogout}
+            variant="danger"
           />
         </Card>
       </ThemedView>
@@ -95,11 +114,11 @@ export default function LoginScreen() {
   // Login view
   return (
     <ThemedView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
@@ -134,12 +153,6 @@ export default function LoginScreen() {
               onPress={handleLogin}
               loading={loading}
             />
-          </Card>
-
-          <Card style={styles.demoCard}>
-            <ThemedText style={styles.demoTitle}>Demo Credentials</ThemedText>
-            <ThemedText style={styles.demoText}>Email: raj@example.com</ThemedText>
-            <ThemedText style={styles.demoText}>Password: password123</ThemedText>
           </Card>
         </ScrollView>
       </KeyboardAvoidingView>

@@ -13,7 +13,7 @@ const opts: ZeroOptions = {
   schema,
   userID: 'anon',
   // cacheURL removed - using local-only storage for development
-  server: Platform.OS === 'web' ? 'http://localhost:4848' : 'http://10.5.48.7:4848',
+  server: Platform.OS === 'web' ? 'http://localhost:4848' : 'http://10.5.48.28:4848',
 }
 
 export const unstable_settings = {

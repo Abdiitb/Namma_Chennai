@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Zero cache configuration",
   "scripts": {
-    "dev": "npx zero-cache-dev --upstream-db postgresql://postgres:password@localhost:5432/citizen_services --port 4848",
+    "dev": "npx zero-cache-dev --upstream-db postgresql://postgres:password@localhost:5432/citizen_services --port 4848 --query-url http://localhost:3000/api/zero/query",
     "start": "npx zero-cache-dev --upstream-db postgresql://postgres:password@localhost:5432/citizen_services --port 4848"
   },
   "dependencies": {

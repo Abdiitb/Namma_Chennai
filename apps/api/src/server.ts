@@ -105,7 +105,7 @@ app.get('/health', (req, res) => {
 // The response should be ["transformed", [{id, name, ast}, ...]]
 app.post('/api/zero/query', async (req, res) => {
   try {
-    console.log('Zero query request body:', JSON.stringify(req.body));
+    // console.log('Zero query request body:', JSON.stringify(req.body));
     
     // Pass the body directly to handleQueryRequest (it accepts ReadonlyJSONValue)
     const result = await handleQueryRequest(
@@ -119,7 +119,7 @@ app.post('/api/zero/query', async (req, res) => {
       req.body  // Pass body directly, not wrapped in Request
     );
     
-    console.log('Zero query result:', JSON.stringify(result));
+    // console.log('Zero query result:', JSON.stringify(result));
     res.json(result);
   } catch (error) {
     console.error('Zero query error:', error);
@@ -225,7 +225,7 @@ app.get('/api/zero/available-queries', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`API server running on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
 });
