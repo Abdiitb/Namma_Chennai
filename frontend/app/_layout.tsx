@@ -11,7 +11,7 @@ import { schema } from '../zero/schema';
 
 const opts: ZeroOptions = {
   schema,
-  userID: 'local-dev-user',
+  userID: 'anon',
   // cacheURL removed - using local-only storage for development
   server: Platform.OS === 'web' ? 'http://localhost:4848' : 'http://10.5.48.7:4848',
 }

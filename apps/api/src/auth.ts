@@ -76,3 +76,38 @@ export async function loginUser(email: string, password: string) {
     },
   };
 }
+
+export async function registerUser(email: string, password: string, name: string, role: string = 'citizen') {
+  // Check if user already exists
+  const existingUser = await query(
+    'SELECT id FROM users WHERE email = $1',
+    [email]
+  );
+
+  if (existingUser.rows.length > 0) {
+    throw new Error('User already exists with this email');
+  }
+
+  // Hash password
+  const passwordHash = await hashPassword(password);
+  const userId = require('uuid').v4();
+
+  // Insert new user
+  const result = await query(
+    'INSERT INTO users (id, email, name, password_hash, role, created_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING id, email, name, role',
+    [userId, email, name, passwordHash, role]
+  );
+
+  const user = result.rows[0];
+  const token = generateToken(user.id, user.role);
+
+  return {
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    },
+  };
+}

@@ -1,117 +1,219 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { useState } from 'react';
+import { StyleSheet, View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { Header } from '@/components/header';
+import { Input } from '@/components/input';
+import { Button } from '@/components/button';
+import { Alert } from '@/components/alert';
+import { Card } from '@/components/card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
-import { useZero, useQuery } from '@rocicorp/zero/react'
-import { zql } from '@/zero/schema';
 import { ZERO_QUERIES } from '@/zero/queries';
+import { useQuery } from '@rocicorp/zero/react';
 
-export default function HomeScreen() {
-  const zero = useZero()
-  const [tickets] = useQuery(
-    zql.tickets.orderBy('created_at', 'desc')
-  )
+const API_BASE_URL = 'http://localhost:3000';
 
-  console.log('Tickets:', tickets);
-  console.log('Zero instance:', zero);
-  console.log('Zero type:', typeof zero);
-  console.log('Zero keys:', zero ? Object.keys(zero) : 'null');
-  console.log('Zero clientID:', zero.clientID);
-  
+export default function LoginScreen() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [user, setUser] = useState<any>(null);
 
+  // Use the defined query instead of raw ZQL
+  const [tickets] = useQuery(ZERO_QUERIES.allTickets());
+
+  console.log('Fetched tickets:', tickets);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Login failed');
+      }
+
+      const data = await response.json();
+      setUser(data.user);
+      console.log('Login successful:', data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setEmail('');
+    setPassword('');
+  };
+
+  // Logged in view
+  if (user) {
+    return (
+      <ThemedView style={styles.container}>
+        <Header title="Namma Chennai" subtitle="Citizen Services Portal" />
+        
+        <Card style={styles.userCard}>
+          <ThemedText style={styles.welcomeText}>Welcome, {user.name}!</ThemedText>
+          
+          <View style={styles.userInfo}>
+            <ThemedText style={styles.infoLabel}>Email</ThemedText>
+            <ThemedText style={styles.infoValue}>{user.email}</ThemedText>
+          </View>
+
+          <View style={styles.userInfo}>
+            <ThemedText style={styles.infoLabel}>Role</ThemedText>
+            <View style={styles.roleBadge}>
+              <ThemedText style={styles.roleText}>{user.role.toUpperCase()}</ThemedText>
+            </View>
+          </View>
+
+          <Button 
+            title="Logout" 
+            onPress={handleLogout} 
+            variant="danger" 
+          />
+        </Card>
+      </ThemedView>
+    );
+  }
+
+  // Login view
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome! {zero.clientID}</ThemedText>
-        <ThemedText>{tickets ? `Tickets count: ${tickets.length}` : 'Loading tickets...'}</ThemedText>
-        {/* {tickets?.map(ticket => (
-          <ThemedText key={ticket.id}>- {ticket.title}</ThemedText>
-        ))} */}
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <ThemedView style={styles.container}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Header title="Namma Chennai" subtitle="Citizen Services Portal" />
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+          <Card>
+            <ThemedText style={styles.formTitle}>Login</ThemedText>
+
+            {error && <Alert type="error" message={error} />}
+
+            <Input
+              label="Email Address"
+              placeholder="Enter your email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!loading}
+            />
+
+            <Input
+              label="Password"
+              placeholder="Enter your password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              editable={!loading}
+            />
+
+            <Button
+              title="Login"
+              onPress={handleLogin}
+              loading={loading}
+            />
+          </Card>
+
+          <Card style={styles.demoCard}>
+            <ThemedText style={styles.demoTitle}>Demo Credentials</ThemedText>
+            <ThemedText style={styles.demoText}>Email: raj@example.com</ThemedText>
+            <ThemedText style={styles.demoText}>Password: password123</ThemedText>
+          </Card>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
   },
-  stepContainer: {
-    gap: 8,
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 20,
+    paddingTop: 40,
+  },
+  formTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  demoCard: {
+    marginTop: 16,
+    backgroundColor: '#f0f8ff',
+  },
+  demoTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  demoText: {
+    fontSize: 13,
+    color: '#666',
+    marginVertical: 2,
+  },
+  userCard: {
+    margin: 20,
+  },
+  welcomeText: {
+    fontSize: 22,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  userInfo: {
+    marginBottom: 16,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+  },
+  roleBadge: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+  },
+  roleText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

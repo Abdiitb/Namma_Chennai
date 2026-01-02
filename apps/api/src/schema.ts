@@ -76,6 +76,41 @@ export const schema = createSchema({
     ticket_events,
     ticket_attachments,
   ],
+  
 });
 
 export const zql = createBuilder(schema);
+
+// Permissions - Allow all access for development
+export const permissions = {
+  users: {
+    read: () => true,
+    insert: () => true,
+    update: () => true,
+    delete: () => true,
+  },
+  staff_profiles: {
+    read: () => true,
+    insert: () => true,
+    update: () => true,
+    delete: () => true,
+  },
+  tickets: {
+    read: () => true,
+    insert: () => true,
+    update: () => true,
+    delete: () => true,
+  },
+  ticket_events: {
+    read: () => true,
+    insert: () => true,
+    update: () => true,
+    delete: () => true,
+  },
+  ticket_attachments: {
+    read: () => true,
+    insert: () => true,
+    update: () => true,
+    delete: () => true,
+  },
+};

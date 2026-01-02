@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 async function generateHashes() {
   const passwords = ['admin123', 'super123', 'staff123', 'citizen123'];

@@ -3,8 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import { authMiddleware, loginUser, AuthenticatedRequest } from './auth';
+import { authMiddleware, loginUser, registerUser, AuthenticatedRequest } from './auth';
 import { ZERO_QUERIES } from './zero-queries';
+import { handleQueryRequest } from '@rocicorp/zero/server';
+import { mustGetQuery } from '@rocicorp/zero';
+import { schema } from './schema';
 import {
   getMyTickets,
   getAssignedTickets,
@@ -32,11 +35,6 @@ app.use(cors());
 app.use(morgan('combined'));
 app.use(express.json());
 
-// Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
-});
-
 // Auth endpoint
 app.post('/auth/login', async (req, res) => {
   try {
@@ -54,7 +52,82 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
-// Zero queries endpoint
+// NEW: Registration endpoint
+app.post('/auth/register', async (req, res) => {
+  try {
+    const { email, password, name, role } = req.body;
+    
+    // Validation
+    if (!email || !password || !name) {
+      return res.status(400).json({ error: 'Email, password, and name are required' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    // Validate password length
+    // if (password.length < 6) {
+    //   return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    // }
+
+    // Default role to 'citizen' if not provided
+    const userRole = role || 'citizen';
+    
+    // Validate role
+    if (!['citizen', 'staff', 'supervisor', 'admin'].includes(userRole)) {
+      return res.status(400).json({ error: 'Invalid role' });
+    }
+
+    const result = await registerUser(email, password, name, userRole);
+    res.status(201).json(result);
+  } catch (error) {
+    console.error('Registration error:', error);
+    const message = (error as Error).message;
+    
+    if (message.includes('already exists')) {
+      res.status(409).json({ error: message });
+    } else {
+      res.status(500).json({ error: message || 'Registration failed' });
+    }
+  }
+});
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Zero query endpoint - This is what zero-cache calls to get ZQL for each query
+// The request body is in the format ["query", [{id, name, args}, ...]]
+// The response should be ["transformed", [{id, name, ast}, ...]]
+app.post('/api/zero/query', async (req, res) => {
+  try {
+    console.log('Zero query request body:', JSON.stringify(req.body));
+    
+    // Pass the body directly to handleQueryRequest (it accepts ReadonlyJSONValue)
+    const result = await handleQueryRequest(
+      (name, args) => {
+        console.log(`Transforming query: ${name}`, args);
+        const query = mustGetQuery(ZERO_QUERIES, name);
+        // For anonymous/development access, use 'anon' as userID
+        return query.fn({ args, ctx: { userID: 'anon' } });
+      },
+      schema,
+      req.body  // Pass body directly, not wrapped in Request
+    );
+    
+    console.log('Zero query result:', JSON.stringify(result));
+    res.json(result);
+  } catch (error) {
+    console.error('Zero query error:', error);
+    res.status(500).json({ error: (error as Error).message });
+  }
+});
+
+// Zero queries endpoint (legacy)
 app.post('/api/zero/queries', authMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const { queryName, args } = req.body;

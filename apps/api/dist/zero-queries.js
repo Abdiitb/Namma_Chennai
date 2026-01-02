@@ -5,6 +5,8 @@ const zero_1 = require("@rocicorp/zero");
 const zod_1 = require("zod");
 const schema_1 = require("./schema");
 exports.ZERO_QUERIES = (0, zero_1.defineQueries)({
+    // Simple query to get all tickets (for development/testing)
+    allTickets: (0, zero_1.defineQuery)(() => schema_1.zql.tickets.orderBy('created_at', 'desc')),
     myTickets: (0, zero_1.defineQuery)(zod_1.z.object({
         userID: zod_1.z.string(),
     }), ({ args: { userID } }) => schema_1.zql.tickets
