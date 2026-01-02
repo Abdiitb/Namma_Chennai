@@ -4,78 +4,89 @@ A full-stack citizen services platform built with React Native (Expo), Node.js A
 
 ## Quick Start
 
-**Note**: This project uses individual npm installs per service (not monorepo workspaces).
-
 ```bash
-# 1. Copy environment variables
-cp .env.example .env
-
-# 2. Start services in separate terminals:
-
-# Terminal 1: Start database
+# 1. Start database
 docker compose up -d postgres
 
-# Terminal 2: Start API server
+# 2. Start API server (in new terminal)
 cd apps/api && npm run dev
 
-# Terminal 3: Start Zero cache server
-cd apps/zero && npx zero-cache-dev --upstream-db postgresql://postgres:password@localhost:5432/citizen_services --port 4848
+# 3. Start Zero cache server (in new terminal)
+cd apps/zero && npm run dev
 
-# Terminal 4: Start frontend (optional)
+# 4. Start frontend (in new terminal - optional)
 cd frontend && npm start
 ```
 
 ## Services & Ports
 
-| Service | URL | Status |
-|---------|-----|--------|
-| API Server | http://localhost:3000 | ✅ Running |
-| API Health | http://localhost:3000/health | ✅ Working |
-| Zero Cache | http://localhost:4848 | ✅ Running |
-| Frontend | http://localhost:8081 | ✅ Ready |
-| Database | localhost:5432 | ✅ Running |
+| Service | URL | 
+|---------|-----|
+| API Server | http://localhost:3000 |
+| Zero Cache | http://localhost:4848 |
+| Frontend | http://localhost:8081 |
+| Database | localhost:5432 |
 
-## Architecture
+## Project Structure
 
 ```
 ├── apps/
-│   ├── api/          # Node.js/Express API server
-│   └── zero/         # Zero cache configuration
-├── packages/
-│   └── shared/       # Shared Zero schema & TypeScript types
-├── frontend/         # Expo React Native app (existing)
-└── docker-compose.yml # PostgreSQL database
+│   ├── api/          # Node.js API server (has schema, types, queries)
+│   └── zero/         # Zero cache server
+├── frontend/         # React Native app (has its own schema copy)
+└── docker-compose.yml
 ```
 
-## Alternative: Using NPM Scripts
+## Demo Users
 
-You can also use these convenient npm scripts from the root directory:
+All demo users have password `password123`:
+
+| Email | Role |
+|-------|------|
+| `raj@example.com` | citizen |
+| `staff@city.gov` | staff |
+| `supervisor@city.gov` | supervisor |
+| `admin@city.gov` | admin |
+
+## Making Schema/Query Changes
+
+When you change the schema or queries, update **both** locations:
+
+1. **Frontend**: `frontend/zero/schema.ts` and `frontend/zero/queries.ts`
+2. **Backend**: `apps/api/src/schema.ts` and `apps/api/src/zero-queries.ts`
+
+Then rebuild the API:
+```bash
+cd apps/api && npm run build
+```
+
+## Useful Commands
 
 ```bash
-# Database management
-npm run db:up          # Start PostgreSQL
-npm run db:down        # Stop PostgreSQL  
-npm run db:reset       # Reset database with fresh data
+# Database
+npm run db:up          # Start database
+npm run db:down        # Stop database
+npm run db:reset       # Reset with fresh data
 
-# Development servers
-npm run dev:api        # Start API server (port 3000)
-npm run dev:zero       # Start Zero cache (port 4848)  
-npm run dev:frontend   # Start Expo frontend (port 8081)
+# Development
+npm run dev:api        # Start API (port 3000)
+npm run dev:zero       # Start Zero cache (port 4848)
+npm run dev:frontend   # Start Expo (port 8081)
 
 # Cleanup
 npm run clean          # Remove all node_modules
 ```
 
-## Prerequisites
+## API Endpoints
 
-- Node.js 18+
-- npm 8+ 
-- Docker & Docker Compose
-- Expo CLI (for frontend: `npm install -g @expo/cli`)
+### Auth
+- `POST /auth/login` - Login with email/password
 
-### Frontend Setup
+### Queries & Mutations
+- `POST /api/zero/queries` - Run queries (myTickets, assignedTickets, etc.)
+- `POST /api/zero/mutate` - Run mutations (createTicket, assignTicket, etc.)
 
-The frontend is already configured in the `frontend/` directory. To connect:
+## Frontend Setup
 
 ```bash
 cd frontend
@@ -83,218 +94,43 @@ npm install
 npm start
 ```
 
-**Important for device testing:** Update the IP addresses in `frontend/zero/provider.tsx`:
+**For device testing**: Update IPs in `frontend/zero/provider.tsx`:
 ```typescript
-const API_BASE_URL = 'http://YOUR_LAN_IP:3000';  // e.g., 'http://192.168.1.100:3000'
-const ZERO_SERVER_URL = 'http://YOUR_LAN_IP:4848';
-```
-
-## Demo Users
-
-All demo users have password `password123`:
-
-| Email | Role | Description |
-|-------|------|-------------|
-| `admin@city.gov` | admin | System administrator |
-| `supervisor@city.gov` | supervisor | Department supervisor |
-| `staff@city.gov` | staff | Field staff member |
-| `raj@example.com` | citizen | Regular citizen |
-| `priya@example.com` | citizen | Regular citizen |
-
-## API Endpoints
-
-### Authentication
-- `POST /auth/login` - Login with email/password
-
-### Zero Endpoints  
-- `POST /api/zero/queries` - Execute named queries
-- `POST /api/zero/mutate` - Execute mutations
-
-### Available Queries
-- `myTickets` - Citizen's tickets
-- `assignedTickets` - Staff's assigned tickets  
-- `supervisorQueue` - Supervisor's pending tickets
-- `ticketDetail` - Full ticket with events & attachments
-
-### Available Mutators
-- `createTicket` - Create new ticket (citizens)
-- `assignTicket` - Assign to staff (supervisors)
-- `startWork` - Mark in progress (staff)
-- `addStaffUpdate` - Add comments (staff)
-- `escalateToSupervisor` - Escalate to supervisor (staff)
-- `markResolved` - Mark resolved (staff/supervisors)
-- `citizenCloseTicket` - Close with rating (citizens)
-- `reopenTicket` - Reopen closed ticket (citizens)
-
-## Frontend Integration
-
-### Zero Provider Setup
-
-Wrap your app with the ZeroProvider:
-
-```tsx
-import ZeroProvider from './zero/provider';
-
-export default function App() {
-  return (
-    <ZeroProvider>
-      <YourAppContent />
-    </ZeroProvider>
-  );
-}
-```
-
-### Using Zero in Components
-
-```tsx
-import { useZero } from './zero/provider';
-
-function MyTickets() {
-  const { zero, user, isAuthenticated } = useZero();
-  
-  // Query tickets
-  const [tickets] = zero.useQuery('myTickets');
-  
-  // Create ticket mutation
-  const createTicket = zero.useMutation('createTicket');
-  
-  return (
-    <View>
-      {/* Your UI here */}
-    </View>
-  );
-}
-```
-
-### Required Dependencies
-
-Add to your frontend `package.json`:
-
-```json
-{
-  "dependencies": {
-    "@citizen-services/shared": "workspace:*",
-    "@rocicorp/zero": "^0.25.6",
-    "@react-native-async-storage/async-storage": "^2.1.0",
-    "expo-sqlite": "^16.0.10"
-  }
-}
-```
-
-## Database Schema
-
-### Core Tables
-
-- **users** - All users (citizens, staff, supervisors, admins)
-- **staff_profiles** - Additional staff information
-- **tickets** - Service requests/complaints
-- **ticket_events** - Activity timeline
-- **ticket_attachments** - Photos/documents
-
-### Ticket Workflow
-
-```
-new → assigned → in_progress → resolved → closed
-  ↓       ↓           ↓
-reopened  escalated → waiting_supervisor
-```
-
-## Development Commands
-
-```bash
-# Development
-pnpm dev                    # Start everything
-pnpm dev:quick             # Start API + Zero only (DB must be running)
-
-# Database  
-pnpm db:up                 # Start PostgreSQL
-pnpm db:down               # Stop PostgreSQL  
-pnpm db:reset              # Reset database & re-run migrations
-pnpm migrate               # Run migrations manually
-
-# Building
-pnpm build:shared          # Build shared package
-pnpm build                 # Build shared + API
-
-# Cleanup
-pnpm clean                 # Remove all node_modules
+const API_BASE_URL = 'http://192.168.1.100:3000';  // Your LAN IP
+const ZERO_SERVER_URL = 'http://192.168.1.100:4848';
 ```
 
 ## Troubleshooting
 
-### First-time Setup Issues
+### Database Issues
 ```bash
-# If you get "module not found" errors, ensure dependencies are installed:
-pnpm install
-
-# If you get workspace warnings, they're harmless but to fix:
-# Make sure pnpm-workspace.yaml exists (should be created by setup)
-
-# If migration fails, ensure database is running first:
-pnpm db:up
-sleep 10  # Wait for DB to be ready
-pnpm migrate
+docker ps                    # Check if running
+docker logs postgres         # View logs
+npm run db:reset            # Reset database
 ```
-
-### Database Connection Issues
-```bash
-# Check if PostgreSQL is running
-docker ps
-
-# View database logs  
-docker logs citizen_services_db
-
-# Reset database completely
-pnpm db:reset
-```
-
-### Zero Cache Issues
-```bash
-# Check Zero cache logs
-pnpm --filter zero dev
-
-# Verify Zero config
-cat apps/zero/zero.config.js
-```
-
-### Frontend Connection Issues
-
-1. **Device Testing**: Update IP addresses in `frontend/zero/provider.tsx`
-2. **Auth Issues**: Check that JWT_SECRET matches between API and Zero
-3. **CORS Issues**: Zero config includes localhost origins
 
 ### API Issues
 ```bash
-# Check API server logs
-pnpm --filter api dev
-
-# Test auth endpoint
+# Test login
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"raj@example.com","password":"password123"}'
 
-# Check available endpoints
-curl http://localhost:3000/api/zero/available-queries
+# Check health
+curl http://localhost:3000/health
 ```
 
-## Production Notes
-
-This is a **prototype setup**. For production:
-
-1. Use proper environment variables for secrets
-2. Set up proper SSL/HTTPS
-3. Use production-ready PostgreSQL (not Docker)
-4. Implement proper error handling & logging
-5. Add input validation & sanitization
-6. Set up proper backup & monitoring
-7. Use PostgreSQL enums instead of TEXT constraints
-8. Implement proper user management & registration
+### Module Not Found
+```bash
+cd apps/api && npm install
+cd apps/zero && npm install
+cd frontend && npm install
+```
 
 ## Tech Stack
 
 - **Backend**: Node.js + Express + TypeScript
 - **Database**: PostgreSQL 15
-- **Real-time**: Zero Cache + Zero Schema  
-- **Frontend**: Expo React Native + TypeScript
-- **Auth**: JWT tokens (prototype only)
-- **Development**: Docker Compose + pnpm workspaces
+- **Real-time**: Zero Cache
+- **Frontend**: Expo + React Native
+- **Auth**: JWT tokens

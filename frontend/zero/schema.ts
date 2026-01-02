@@ -1,5 +1,4 @@
-// Define schema locally to ensure single instance
-import { createSchema, table, string, number, createBuilder } from '@rocicorp/zero';
+import { createSchema, table, string, number, createBuilder, definePermissions, ANYONE_CAN_DO_ANYTHING } from '@rocicorp/zero';
 
 export const users = table('users')
   .columns({
@@ -9,7 +8,7 @@ export const users = table('users')
     phone: string().optional(),
     email: string().optional(),
     password_hash: string(),
-    created_at: number(),      // Change from number() to string()
+    created_at: number(),
   })
   .primaryKey('id');
 
@@ -37,8 +36,8 @@ export const tickets = table('tickets')
     current_supervisor: string().optional(),
     citizen_rating: number().optional(),
     citizen_feedback: string().optional(),
-    created_at: number(),      // Change from number() to string()
-    updated_at: number(),      // Change from number() to string()
+    created_at: number(),
+    updated_at: number(),
     closed_at: number().optional(),
   })
   .primaryKey('id');
@@ -52,7 +51,7 @@ export const ticket_events = table('ticket_events')
     from_status: string().optional(),
     to_status: string().optional(),
     message: string().optional(),
-    created_at: number(),      // Change from number() to string()
+    created_at: number(),
   })
   .primaryKey('id');
 
@@ -65,7 +64,7 @@ export const ticket_attachments = table('ticket_attachments')
     url: string(),
     mime_type: string().optional(),
     caption: string().optional(),
-    created_at: number(),      // Change from number() to string()
+    created_at: number(),
   })
   .primaryKey('id');
 
@@ -80,3 +79,20 @@ export const schema = createSchema({
 });
 
 export const zql = createBuilder(schema);
+
+// Debug: Log the query builder construction
+console.log('🔧 Schema Debug:', {
+  schema: schema,
+  zql: zql,
+  zqlTickets: zql.tickets,
+  zqlUsers: zql.users
+});
+
+// Simplified permissions for now - deprecation warnings can be addressed later
+export const permissions = definePermissions<unknown, typeof schema>(schema, () => ({
+  users: ANYONE_CAN_DO_ANYTHING,
+  staff_profiles: ANYONE_CAN_DO_ANYTHING,
+  tickets: ANYONE_CAN_DO_ANYTHING,
+  ticket_events: ANYONE_CAN_DO_ANYTHING,
+  ticket_attachments: ANYONE_CAN_DO_ANYTHING,
+}));

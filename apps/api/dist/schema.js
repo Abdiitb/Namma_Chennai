@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.permissions = exports.zql = exports.schema = exports.ticket_attachments = exports.ticket_events = exports.tickets = exports.staff_profiles = exports.users = void 0;
+exports.permissions = exports.zql = exports.schema = exports.ticket_attachments = exports.ticket_events = exports.tickets = exports.staff_profiles = exports.users = void 0;
 const zero_1 = require("@rocicorp/zero");
 exports.users = (0, zero_1.table)('users')
     .columns({

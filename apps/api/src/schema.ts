@@ -1,4 +1,4 @@
-import { createSchema, table, string, number, createBuilder } from '@rocicorp/zero';
+import { createSchema, table, string, number, createBuilder, definePermissions, ANYONE_CAN_DO_ANYTHING } from '@rocicorp/zero';
 
 export const users = table('users')
   .columns({

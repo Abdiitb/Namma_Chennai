@@ -23,6 +23,11 @@ export const unstable_settings = {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
+  console.log('=== RootLayout ZeroProvider Setup ===');
+  console.log('Platform.OS:', Platform.OS);
+  console.log('Zero options:', opts);
+  console.log('KV Store:', Platform.OS !== 'web' ? 'expo-sqlite' : 'idb');
+
   return (
     <ZeroProvider
       {...opts}
