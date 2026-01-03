@@ -1,0 +1,560 @@
+import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { ThemedText } from '@/components/themed-text';
+import TicketStatusProgress from '@/components/ticket-status-progress';
+import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'open': return '#EF4444';
+    case 'assigned': return '#F59E0B';
+    case 'in_progress': return '#3B82F6';
+    case 'waiting_supervisor': return '#8B5CF6';
+    case 'resolved': return '#10B981';
+    default: return '#6B7280';
+  }
+};
+
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case 'open': return 'New';
+    case 'assigned': return 'Assigned';
+    case 'in_progress': return 'In Progress';
+    case 'waiting_supervisor': return 'Under Review';
+    case 'resolved': return 'Resolved';
+    default: return status;
+  }
+};
+
+const getCategoryIcon = (category: string): keyof typeof Ionicons.glyphMap => {
+  switch (category?.toLowerCase()) {
+    case 'roads': return 'car-outline';
+    case 'water': return 'water-outline';
+    case 'electricity': return 'flash-outline';
+    case 'sanitation': return 'trash-outline';
+    case 'street lights': return 'bulb-outline';
+    case 'drainage': return 'rainy-outline';
+    default: return 'document-outline';
+  }
+};
+
+const getCategoryColor = (category: string) => {
+  switch (category?.toLowerCase()) {
+    case 'roads': return '#F59E0B';
+    case 'water': return '#3B82F6';
+    case 'electricity': return '#EAB308';
+    case 'sanitation': return '#10B981';
+    case 'street lights': return '#F97316';
+    case 'drainage': return '#6366F1';
+    default: return '#6366F1';
+  }
+};
+
+export default function TicketDetailsScreen() {
+  const params = useLocalSearchParams();
+  
+  if (!params || !params.id) {
+    return (
+      <SafeAreaView style={styles.screen} edges={['top']}>
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
+          <ThemedText style={styles.errorText}>Ticket not found</ThemedText>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const createdAt = params.created_at 
+    ? new Date(Number(params.created_at)).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : 'N/A';
+    
+  const updatedAt = params.updated_at 
+    ? new Date(Number(params.updated_at)).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : 'N/A';
+    
+  const closedAt = params.closed_at 
+    ? new Date(Number(params.closed_at)).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null;
+
+  const statusColor = getStatusColor(params.status as string);
+  const categoryIcon = getCategoryIcon(params.category as string);
+  const categoryColor = getCategoryColor(params.category as string);
+
+  return (
+    <SafeAreaView style={styles.screen} edges={['top']}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+        </Pressable>
+        <ThemedText style={styles.headerTitle}>Ticket Details</ThemedText>
+        <Pressable style={styles.moreButton}>
+          <Ionicons name="ellipsis-vertical" size={20} color="#6B7280" />
+        </Pressable>
+      </View>
+
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Main Info Card */}
+        <View style={styles.mainCard}>
+          {/* Category & Status Header */}
+          <View style={styles.cardHeader}>
+            <View style={styles.categoryBadge}>
+              <View style={[styles.categoryIconBox, { backgroundColor: categoryColor + '15' }]}>
+                <Ionicons name={categoryIcon} size={22} color={categoryColor} />
+              </View>
+              <View>
+                <ThemedText style={styles.ticketIdText}>{params.id}</ThemedText>
+                <ThemedText style={styles.categoryText}>{params.category}</ThemedText>
+              </View>
+            </View>
+            <View style={[styles.statusBadge, { backgroundColor: statusColor + '15' }]}>
+              <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+              <ThemedText style={[styles.statusText, { color: statusColor }]}>
+                {getStatusLabel(params.status as string)}
+              </ThemedText>
+            </View>
+          </View>
+
+          {/* Title & Description */}
+          <ThemedText style={styles.title}>{params.title || 'Untitled Ticket'}</ThemedText>
+          <ThemedText style={styles.description}>{params.description}</ThemedText>
+
+          {/* Location */}
+          {params.address_text && (
+            <View style={styles.locationBox}>
+              <Ionicons name="location" size={18} color="#6366F1" />
+              <ThemedText style={styles.locationText}>{params.address_text}</ThemedText>
+            </View>
+          )}
+        </View>
+
+        {/* Progress Tracker */}
+        <TicketStatusProgress status={params.status as string} />
+
+        {/* Details Grid */}
+        <View style={styles.detailsCard}>
+          <ThemedText style={styles.sectionTitle}>Ticket Information</ThemedText>
+          
+          <View style={styles.detailsGrid}>
+            <DetailItem 
+              icon="calendar-outline" 
+              label="Created" 
+              value={createdAt}
+              iconColor="#6366F1"
+            />
+            <DetailItem 
+              icon="time-outline" 
+              label="Last Updated" 
+              value={updatedAt}
+              iconColor="#F59E0B"
+            />
+            {closedAt && (
+              <DetailItem 
+                icon="checkmark-done-outline" 
+                label="Closed" 
+                value={closedAt}
+                iconColor="#10B981"
+              />
+            )}
+            <DetailItem 
+              icon="person-outline" 
+              label="Created By" 
+              value={params.created_by as string || 'N/A'}
+              iconColor="#8B5CF6"
+            />
+            {params.assigned_to && (
+              <DetailItem 
+                icon="people-outline" 
+                label="Assigned To" 
+                value={params.assigned_to as string}
+                iconColor="#3B82F6"
+              />
+            )}
+            {params.current_supervisor && (
+              <DetailItem 
+                icon="shield-checkmark-outline" 
+                label="Supervisor" 
+                value={params.current_supervisor as string}
+                iconColor="#EC4899"
+              />
+            )}
+          </View>
+        </View>
+
+        {/* Feedback Card (if resolved) */}
+        {params.status === 'resolved' && (
+          <View style={styles.feedbackCard}>
+            <ThemedText style={styles.sectionTitle}>Citizen Feedback</ThemedText>
+            
+            <View style={styles.ratingContainer}>
+              <ThemedText style={styles.ratingLabel}>Rating</ThemedText>
+              <View style={styles.starsRow}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Ionicons
+                    key={star}
+                    name={Number(params.citizen_rating) >= star ? 'star' : 'star-outline'}
+                    size={24}
+                    color={Number(params.citizen_rating) >= star ? '#F59E0B' : '#D1D5DB'}
+                  />
+                ))}
+              </View>
+            </View>
+            
+            {params.citizen_feedback && (
+              <View style={styles.feedbackTextBox}>
+                <Ionicons name="chatbubble-ellipses-outline" size={16} color="#6366F1" />
+                <ThemedText style={styles.feedbackText}>
+                  "{params.citizen_feedback}"
+                </ThemedText>
+              </View>
+            )}
+            
+            {!params.citizen_rating && !params.citizen_feedback && (
+              <View style={styles.noFeedbackBox}>
+                <Ionicons name="chatbubbles-outline" size={24} color="#D1D5DB" />
+                <ThemedText style={styles.noFeedbackText}>No feedback provided yet</ThemedText>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Action Buttons */}
+        <View style={styles.actionsContainer}>
+          {params.status !== 'resolved' && (
+            <Pressable style={styles.primaryButton}>
+              <Ionicons name="chatbubble-outline" size={20} color="#FFFFFF" />
+              <ThemedText style={styles.primaryButtonText}>Add Comment</ThemedText>
+            </Pressable>
+          )}
+          
+          {params.status === 'resolved' && !params.citizen_rating && (
+            <Pressable style={styles.primaryButton}>
+              <Ionicons name="star-outline" size={20} color="#FFFFFF" />
+              <ThemedText style={styles.primaryButtonText}>Rate Service</ThemedText>
+            </Pressable>
+          )}
+          
+          <Pressable style={styles.secondaryButton}>
+            <Ionicons name="share-outline" size={20} color="#6366F1" />
+            <ThemedText style={styles.secondaryButtonText}>Share</ThemedText>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+interface DetailItemProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+  iconColor: string;
+}
+
+function DetailItem({ icon, label, value, iconColor }: DetailItemProps) {
+  return (
+    <View style={styles.detailItem}>
+      <View style={[styles.detailIconBox, { backgroundColor: iconColor + '15' }]}>
+        <Ionicons name={icon} size={16} color={iconColor} />
+      </View>
+      <View style={styles.detailTextContainer}>
+        <ThemedText style={styles.detailLabel}>{label}</ThemedText>
+        <ThemedText style={styles.detailValue} numberOfLines={1}>{value}</ThemedText>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F9FAFB',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1F2937',
+  },
+  moreButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  content: {
+    flex: 1,
+  },
+  contentContainer: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#6B7280',
+    marginTop: 12,
+  },
+  mainCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  categoryBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  categoryIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ticketIdText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#6366F1',
+  },
+  categoryText: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 2,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 8,
+    lineHeight: 28,
+  },
+  description: {
+    fontSize: 15,
+    color: '#6B7280',
+    lineHeight: 22,
+    marginBottom: 16,
+  },
+  locationBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#EEF2FF',
+    padding: 12,
+    borderRadius: 10,
+    gap: 10,
+  },
+  locationText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#4338CA',
+    lineHeight: 20,
+  },
+  detailsCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    marginTop: 12,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 16,
+  },
+  detailsGrid: {
+    gap: 12,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  detailIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  detailTextContainer: {
+    flex: 1,
+  },
+  detailLabel: {
+    fontSize: 11,
+    color: '#9CA3AF',
+    fontWeight: '500',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  detailValue: {
+    fontSize: 14,
+    color: '#374151',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  feedbackCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+    marginTop: 12,
+  },
+  ratingContainer: {
+    marginBottom: 16,
+  },
+  ratingLabel: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  starsRow: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  feedbackTextBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#F9FAFB',
+    padding: 14,
+    borderRadius: 10,
+    gap: 10,
+  },
+  feedbackText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#374151',
+    fontStyle: 'italic',
+    lineHeight: 20,
+  },
+  noFeedbackBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  noFeedbackText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    marginTop: 8,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 20,
+  },
+  primaryButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#6366F1',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    gap: 8,
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  primaryButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  secondaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EEF2FF',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    gap: 8,
+  },
+  secondaryButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#6366F1',
+  },
+});

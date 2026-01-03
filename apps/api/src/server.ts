@@ -8,22 +8,11 @@ import { ZERO_QUERIES } from './zero-queries';
 import { handleQueryRequest } from '@rocicorp/zero/server';
 import { mustGetQuery } from '@rocicorp/zero';
 import { schema } from './schema';
-import {
-  getMyTickets,
-  getAssignedTickets,
-  getSupervisorQueue,
-  getTicketDetail,
-} from './queries';
-import {
-  createTicket,
-  assignTicket,
-  startWork,
-  addStaffUpdate,
-  escalateToSupervisor,
-  markResolved,
-  citizenCloseTicket,
-  reopenTicket,
-} from './mutators';
+import { dbProvider } from './database';
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import { mutators } from './mutators';
+
 
 dotenv.config();
 
@@ -113,7 +102,7 @@ app.post('/api/zero/query', async (req, res) => {
         console.log(`Transforming query: ${name}`, args);
         const query = mustGetQuery(ZERO_QUERIES, name);
         // For anonymous/development access, use 'anon' as userID
-        return query.fn({ args, ctx: { userID: 'anon' } });
+        return query.fn({ args, ctx: { userID: 'anon', role: 'anon' } });
       },
       schema,
       req.body  // Pass body directly, not wrapped in Request
@@ -127,81 +116,40 @@ app.post('/api/zero/query', async (req, res) => {
   }
 });
 
-// Zero queries endpoint (legacy)
-app.post('/api/zero/queries', authMiddleware, async (req: AuthenticatedRequest, res) => {
-  try {
-    const { queryName, args } = req.body;
-    const auth = req.auth!;
-
-    console.log(`Processing query: ${queryName} for user: ${auth.userID} (${auth.role})`);
-
-    let result;
-    switch (queryName) {
-      case 'myTickets':
-        result = await getMyTickets(auth);
-        break;
-      case 'assignedTickets':
-        result = await getAssignedTickets(auth);
-        break;
-      case 'supervisorQueue':
-        result = await getSupervisorQueue(auth);
-        break;
-      case 'ticketDetail':
-        if (!args?.ticketId) {
-          return res.status(400).json({ error: 'ticketId is required' });
-        }
-        result = await getTicketDetail(args.ticketId, auth);
-        break;
-      default:
-        return res.status(400).json({ error: `Unknown query: ${queryName}` });
-    }
-
-    res.json({ data: result });
-  } catch (error) {
-    console.error('Query error:', error);
-    res.status(500).json({ error: (error as Error).message });
-  }
-});
-
-// Zero mutate endpoint
+// Zero mutate endpoint - UPDATED to use handleMutateRequest
 app.post('/api/zero/mutate', authMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const { mutatorName, input } = req.body;
     const auth = req.auth!;
+    console.log('--- /api/zero/mutate called ---');
+    console.log('Request body:', req);
+    console.log('Authenticated user:', auth);
+    // Create context from authenticated user
+    const ctx = {
+      userID: auth.userID,
+      role: auth.role,
+    };
 
-    console.log(`Processing mutator: ${mutatorName} for user: ${auth.userID} (${auth.role})`);
-
-    let result;
-    switch (mutatorName) {
-      case 'createTicket':
-        result = await createTicket(input, auth);
-        break;
-      case 'assignTicket':
-        result = await assignTicket(input, auth);
-        break;
-      case 'startWork':
-        result = await startWork(input, auth);
-        break;
-      case 'addStaffUpdate':
-        result = await addStaffUpdate(input, auth);
-        break;
-      case 'escalateToSupervisor':
-        result = await escalateToSupervisor(input, auth);
-        break;
-      case 'markResolved':
-        result = await markResolved(input, auth);
-        break;
-      case 'citizenCloseTicket':
-        result = await citizenCloseTicket(input, auth);
-        break;
-      case 'reopenTicket':
-        result = await reopenTicket(input, auth);
-        break;
-      default:
-        return res.status(400).json({ error: `Unknown mutator: ${mutatorName}` });
-    }
-
-    res.json({ data: result });
+    console.log('Calling handleMutateRequest...');
+    console.log('DB Provider:', dbProvider);
+    const result = await handleMutateRequest(
+      dbProvider,
+      (transact) =>
+        transact(async (tx, name, args) => {
+          console.log(`Processing mutator: ${name} for user: ${ctx.userID} (${ctx.role})`);
+          const mutator = mustGetMutator(mutators, name);
+          return mutator.fn({
+            tx,
+            ctx,
+            args,
+          });
+        }),
+      req.query,
+      req.body  // Pass the Express request directly
+    );
+    // const jsonBody = await req.body.json();
+    // console.log('Mutate request body JSON:', jsonBody);
+    console.log('handleMutateRequest result:', result);
+    res.status(200).json(result);
   } catch (error) {
     console.error('Mutator error:', error);
     res.status(500).json({ error: (error as Error).message });

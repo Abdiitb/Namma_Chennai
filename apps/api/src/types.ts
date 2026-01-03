@@ -1,3 +1,21 @@
+// types.ts
+import { schema } from './schema';
+
+export type Schema = typeof schema;
+
+export interface ZeroContext {
+  userID: string;
+  role: string;
+}
+
+// Make TypeScript aware of your types
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    schema: Schema;
+    context: ZeroContext;
+  }
+}
+
 export type UserRole = 'citizen' | 'staff' | 'supervisor' | 'admin';
 
 export type TicketCategory = 'garbage' | 'electricity' | 'water' | 'other';

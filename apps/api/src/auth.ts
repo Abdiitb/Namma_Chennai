@@ -11,13 +11,14 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export function generateToken(userID: string, role: UserRole): string {
-  return jwt.sign({ userID, role }, JWT_SECRET, { expiresIn: '24h' });
+  // Use 'sub' (subject) claim as required by Zero, plus custom claims
+  return jwt.sign({ sub: userID, role }, JWT_SECRET, { expiresIn: '24h' });
 }
 
 export function verifyToken(token: string): AuthContext {
   const decoded = jwt.verify(token, JWT_SECRET) as any;
   return {
-    userID: decoded.userID,
+    userID: decoded.sub || decoded.userID, // Support both for backwards compatibility
     role: decoded.role,
   };
 }

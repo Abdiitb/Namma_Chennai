@@ -1,5 +1,7 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import { zeroNodePg } from '@rocicorp/zero/server/adapters/pg';
+import { schema } from './schema';
 
 dotenv.config();
 
@@ -39,3 +41,5 @@ export async function transaction<T>(callback: (query: (text: string, params?: a
     client.release();
   }
 }
+
+export const dbProvider = zeroNodePg(schema, pool);

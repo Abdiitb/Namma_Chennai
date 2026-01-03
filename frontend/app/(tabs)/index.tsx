@@ -1,232 +1,218 @@
-import { useState } from 'react';
-import { StyleSheet, View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { Header } from '@/components/header';
-import { Input } from '@/components/input';
-import { Button } from '@/components/button';
-import { Alert } from '@/components/alert';
-import { Card } from '@/components/card';
+import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
+import { router } from 'expo-router';
+import { HomeHeader } from '@/components/home-header';
+import { ServiceCard } from '@/components/service-card';
+import { QuickActions } from '@/components/quick-actions';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { ZERO_QUERIES } from '@/zero/queries';
-import { useQuery } from '@rocicorp/zero/react';
+import { useAuthState } from '@/hooks/use-auth';
+import { Ionicons } from '@expo/vector-icons';
+import { SERVICES, QUICK_ACTIONS } from '@/constants/services';
 
-const API_BASE_URL = Platform.OS === 'web' ? 'http://localhost:3000' : 'http://10.5.48.28:3000';
+export default function HomeScreen() {
+  const { user, logout } = useAuthState();
 
-export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [user, setUser] = useState<any>(null);
-
-  // Use the defined query instead of raw ZQL
-  const [tickets] = useQuery(ZERO_QUERIES.allTickets());
-
-  // console.log('Fetched tickets:', tickets);
-
-  const handleLogin = async () => {
-    if (!email || !password) {
-      setError('Please enter both email and password');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Login failed');
-      }
-
-      const data = await response.json();
-      setUser(data.user);
-      console.log('Login successful:', data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
+  const handleServicePress = (serviceId: string) => {
+    // Navigate to appropriate screen based on service
+    if (serviceId === '3') {
+      router.push('/(tabs)/tickets');
+    } else if (serviceId === '1') {
+      router.push('/(tabs)/issues');
     }
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    setEmail('');
-    setPassword('');
+  const handleQuickAction = (actionId: string) => {
+    // Handle quick action - navigate to report issue with pre-selected category
+    router.push('/(tabs)/issues');
   };
 
-  // Logged in view
-  if (user) {
-    return (
-      <ThemedView style={styles.container}>
-        <Header title="Namma Chennai" subtitle="Citizen Services Portal" />
-
-        <Card style={styles.userCard}>
-          <ThemedText style={styles.welcomeText}>Welcome, {user.name}!</ThemedText>
-
-          <View style={styles.userInfo}>
-            <ThemedText style={styles.infoLabel}>Email</ThemedText>
-            <ThemedText style={styles.infoValue}>{user.email}</ThemedText>
+  return (
+    <View style={styles.container}>
+      <HomeHeader 
+        userName={user?.name || 'Citizen'} 
+        onProfilePress={() => logout()}
+      />
+      
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Services Grid */}
+        <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>Namma Chennai Services</ThemedText>
+          <View style={styles.servicesGrid}>
+            {SERVICES.map((service) => (
+              <View key={service.id} style={styles.serviceItem}>
+                <ServiceCard
+                  title={service.title}
+                  icon={service.icon}
+                  iconColor={service.iconColor}
+                  iconBgColor={service.iconBgColor}
+                  onPress={() => handleServicePress(service.id)}
+                />
+              </View>
+            ))}
           </View>
+        </View>
 
-          <View style={styles.userInfo}>
-            <ThemedText style={styles.infoLabel}>Role</ThemedText>
-            <View style={styles.roleBadge}>
-              <ThemedText style={styles.roleText}>{user.role.toUpperCase()}</ThemedText>
+        {/* Quick Actions */}
+        <QuickActions 
+          title="Quick Report"
+          items={QUICK_ACTIONS}
+          onItemPress={handleQuickAction}
+        />
+
+        {/* Recent Activity Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <ThemedText style={styles.sectionTitle}>Recent Activity</ThemedText>
+            <Pressable>
+              <ThemedText style={styles.seeAll}>See All →</ThemedText>
+            </Pressable>
+          </View>
+          
+          <View style={styles.activityCard}>
+            <View style={styles.activityIcon}>
+              <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+            </View>
+            <View style={styles.activityContent}>
+              <ThemedText style={styles.activityTitle}>Pothole Repair Completed</ThemedText>
+              <ThemedText style={styles.activitySubtitle}>Anna Nagar, Chennai</ThemedText>
+              <ThemedText style={styles.activityTime}>2 hours ago</ThemedText>
             </View>
           </View>
 
-          {tickets.length > 0 && (
-            <>
-              <View style={styles.userInfo}>
-                <ThemedText style={styles.infoLabel}>You have {tickets.length} tickets in the system.</ThemedText>
-              </View>
+          <View style={styles.activityCard}>
+            <View style={styles.activityIcon}>
+              <Ionicons name="time" size={24} color="#F59E0B" />
+            </View>
+            <View style={styles.activityContent}>
+              <ThemedText style={styles.activityTitle}>Street Light Issue - In Progress</ThemedText>
+              <ThemedText style={styles.activitySubtitle}>T. Nagar, Chennai</ThemedText>
+              <ThemedText style={styles.activityTime}>Yesterday</ThemedText>
+            </View>
+          </View>
+        </View>
 
-              <View>
-                <ThemedText style={styles.infoLabel}>Ticket Details:</ThemedText>
-                {tickets.map((ticket: any) => (
-                  <View key={ticket.id}>
-                    <ThemedText style={styles.infoValue}>Ticket Title: {ticket.title}</ThemedText>
-                    <ThemedText style={styles.infoValue}>- {ticket.address_text || 'No Title'}</ThemedText>
-                    <ThemedText style={styles.infoValue}>  Status: {ticket.status}</ThemedText>
-                  </View>
-                ))}
-              </View>
-            </>
-          )}
-
-          <Button
-            title="Logout"
-            onPress={handleLogout}
-            variant="danger"
-          />
-        </Card>
-      </ThemedView>
-    );
-  }
-
-  // Login view
-  return (
-    <ThemedView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <Header title="Namma Chennai" subtitle="Citizen Services Portal" />
-
-          <Card>
-            <ThemedText style={styles.formTitle}>Login</ThemedText>
-
-            {error && <Alert type="error" message={error} />}
-
-            <Input
-              label="Email Address"
-              placeholder="Enter your email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              editable={!loading}
-            />
-
-            <Input
-              label="Password"
-              placeholder="Enter your password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              editable={!loading}
-            />
-
-            <Button
-              title="Login"
-              onPress={handleLogin}
-              loading={loading}
-            />
-          </Card>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </ThemedView>
+        {/* Stats Section */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statCard}>
+            <ThemedText style={styles.statNumber}>156</ThemedText>
+            <ThemedText style={styles.statLabel}>Issues Resolved</ThemedText>
+          </View>
+          <View style={styles.statCard}>
+            <ThemedText style={styles.statNumber}>23</ThemedText>
+            <ThemedText style={styles.statLabel}>In Progress</ThemedText>
+          </View>
+          <View style={styles.statCard}>
+            <ThemedText style={styles.statNumber}>4.8</ThemedText>
+            <ThemedText style={styles.statLabel}>Avg. Rating</ThemedText>
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F9FAFB',
   },
-  keyboardView: {
+  scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
-    paddingTop: 40,
+    paddingBottom: 24,
   },
-  formTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 20,
-    textAlign: 'center',
+  section: {
+    paddingHorizontal: 16,
+    marginTop: 24,
   },
-  demoCard: {
-    marginTop: 16,
-    backgroundColor: '#f0f8ff',
-  },
-  demoTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  demoText: {
-    fontSize: 13,
-    color: '#666',
-    marginVertical: 2,
-  },
-  userCard: {
-    margin: 20,
-  },
-  welcomeText: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  userInfo: {
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
   },
-  infoLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  infoValue: {
+  sectionTitle: {
     fontSize: 16,
-    color: '#333',
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 16,
+  },
+  seeAll: {
+    fontSize: 14,
+    color: '#6366F1',
     fontWeight: '500',
   },
-  roleBadge: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
+  servicesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -6,
   },
-  roleText: {
-    color: '#fff',
-    fontSize: 12,
+  serviceItem: {
+    width: '33.33%',
+    padding: 6,
+  },
+  activityCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  activityIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#F9FAFB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  activityContent: {
+    flex: 1,
+  },
+  activityTitle: {
+    fontSize: 14,
     fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 2,
+  },
+  activitySubtitle: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  activityTime: {
+    fontSize: 12,
+    color: '#9CA3AF',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    marginTop: 24,
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#6366F1',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
   },
 });

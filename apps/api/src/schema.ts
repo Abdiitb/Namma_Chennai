@@ -1,4 +1,4 @@
-import { createSchema, table, string, number, createBuilder, definePermissions, ANYONE_CAN_DO_ANYTHING } from '@rocicorp/zero';
+import { createSchema, table, string, number, createBuilder } from '@rocicorp/zero';
 
 export const users = table('users')
   .columns({
@@ -80,37 +80,3 @@ export const schema = createSchema({
 });
 
 export const zql = createBuilder(schema);
-
-// Permissions - Allow all access for development
-export const permissions = {
-  users: {
-    read: () => true,
-    insert: () => true,
-    update: () => true,
-    delete: () => true,
-  },
-  staff_profiles: {
-    read: () => true,
-    insert: () => true,
-    update: () => true,
-    delete: () => true,
-  },
-  tickets: {
-    read: () => true,
-    insert: () => true,
-    update: () => true,
-    delete: () => true,
-  },
-  ticket_events: {
-    read: () => true,
-    insert: () => true,
-    update: () => true,
-    delete: () => true,
-  },
-  ticket_attachments: {
-    read: () => true,
-    insert: () => true,
-    update: () => true,
-    delete: () => true,
-  },
-};
