@@ -23,7 +23,7 @@ export function HomeHeader({
 
                 <View style={styles.rightSection}>
                     <Pressable style={styles.iconButton} onPress={onNotificationPress}>
-                        <Ionicons name="notifications-outline" size={24} color="#fff" />
+                        <Ionicons name="notifications-outline" size={24} color="#FFD600" />
                         <View style={styles.badge} />
                     </Pressable>
 
@@ -38,7 +38,7 @@ export function HomeHeader({
 
 const styles = StyleSheet.create({
     safeArea: {
-        backgroundColor: '#6366F1',
+        backgroundColor: '#000000',
     },
     container: {
         flexDirection: 'row',
@@ -46,19 +46,19 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 16,
         paddingVertical: 16,
-        backgroundColor: '#6366F1',
+        backgroundColor: '#000000',
     },
     leftSection: {
         flex: 1,
     },
     greeting: {
         fontSize: 14,
-        color: 'rgba(255, 255, 255, 0.8)',
+        color: '#FFFFFF',
     },
     userName: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#fff',
+        color: '#FFD600',
     },
     rightSection: {
         flexDirection: 'row',
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        backgroundColor: '#1A1A1A',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -80,13 +80,13 @@ const styles = StyleSheet.create({
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: '#EF4444',
+        backgroundColor: '#FFD600',
     },
     profileButton: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#fff',
+        backgroundColor: '#FFD600',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#fff',
+        backgroundColor: '#1A1A1A',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 1,

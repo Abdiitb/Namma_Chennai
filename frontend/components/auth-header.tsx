@@ -14,9 +14,9 @@ export function AuthHeader({
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         {/* Placeholder for logo - you can replace with actual image */}
-        <View style={styles.logoCircle}>
+        {/* <View style={styles.logoCircle}>
           <ThemedText style={styles.logoText}>NC</ThemedText>
-        </View>
+        </View> */}
       </View>
       <ThemedText style={styles.title}>{title}</ThemedText>
       <ThemedText style={styles.subtitle}>{subtitle}</ThemedText>
@@ -26,7 +26,7 @@ export function AuthHeader({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#6366F1',
+    backgroundColor: '#000000',
     paddingTop: 60,
     paddingBottom: 40,
     paddingHorizontal: 24,
@@ -41,23 +41,23 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#FFD600',
     alignItems: 'center',
     justifyContent: 'center',
   },
   logoText: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000000',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#FFD600',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: '#FFD600',
   },
 });

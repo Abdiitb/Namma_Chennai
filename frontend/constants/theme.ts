@@ -5,25 +5,45 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#FFD600'; // Yellow
-const tintColorDark = '#FFD600'; // Yellow
+// Theme Colors - Black, Yellow, White
+export const ThemeColors = {
+  black: '#000000',
+  yellow: '#FFD600',
+  white: '#FFFFFF',
+  darkGray: '#1A1A1A',
+  lightGray: '#F5F5F5',
+  gray: '#6B7280',
+  error: '#EF4444',
+  success: '#22C55E',
+};
+
+const tintColorLight = ThemeColors.yellow;
+const tintColorDark = ThemeColors.yellow;
 
 export const Colors = {
   light: {
-    text: '#FFD600', // Yellow text
-    background: '#000000', // Black background
+    text: ThemeColors.black,
+    background: ThemeColors.white,
     tint: tintColorLight,
-    icon: '#FFD600', // Yellow icons
-    tabIconDefault: '#FFD600',
+    icon: ThemeColors.yellow,
+    tabIconDefault: ThemeColors.gray,
     tabIconSelected: tintColorLight,
+    card: ThemeColors.white,
+    border: ThemeColors.yellow,
+    primary: ThemeColors.yellow,
+    secondary: ThemeColors.black,
   },
   dark: {
-    text: '#FFD600', // Yellow text
-    background: '#000000', // Black background
+    text: ThemeColors.white,
+    background: ThemeColors.black,
     tint: tintColorDark,
-    icon: '#FFD600', // Yellow icons
-    tabIconDefault: '#FFD600',
+    icon: ThemeColors.yellow,
+    tabIconDefault: ThemeColors.gray,
     tabIconSelected: tintColorDark,
+    card: ThemeColors.darkGray,
+    border: ThemeColors.yellow,
+    primary: ThemeColors.yellow,
+    secondary: ThemeColors.white,
   },
 };
 
@@ -51,3 +71,34 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
+
+// Navigation Theme for React Navigation
+export const YellowBlackTheme = {
+  dark: true,
+  colors: {
+    primary: ThemeColors.yellow,
+    background: ThemeColors.black,
+    card: ThemeColors.darkGray,
+    text: ThemeColors.white,
+    border: ThemeColors.yellow,
+    notification: ThemeColors.yellow,
+  },
+  fonts: {
+    regular: {
+      fontFamily: Platform.select({ ios: 'System', default: 'sans-serif' }),
+      fontWeight: '400' as const,
+    },
+    medium: {
+      fontFamily: Platform.select({ ios: 'System', default: 'sans-serif-medium' }),
+      fontWeight: '500' as const,
+    },
+    bold: {
+      fontFamily: Platform.select({ ios: 'System', default: 'sans-serif' }),
+      fontWeight: '700' as const,
+    },
+    heavy: {
+      fontFamily: Platform.select({ ios: 'System', default: 'sans-serif' }),
+      fontWeight: '900' as const,
+    },
+  },
+};

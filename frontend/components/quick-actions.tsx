@@ -31,8 +31,8 @@ export function QuickActions({ title, items, onItemPress }: QuickActionsProps) {
             style={styles.item}
             onPress={() => onItemPress?.(item.id)}
           >
-            <View style={[styles.iconCircle, { backgroundColor: item.bgColor || '#EEF2FF' }]}>
-              <Ionicons name={item.icon} size={24} color={item.iconColor || '#6366F1'} />
+            <View style={[styles.iconCircle, { backgroundColor: item.bgColor || '#1A1A1A' }]}>
+              <Ionicons name={item.icon} size={24} color={item.iconColor || '#FFD600'} />
             </View>
             <ThemedText style={styles.itemTitle} numberOfLines={2}>{item.title}</ThemedText>
           </Pressable>
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#000000',
     marginBottom: 16,
     paddingHorizontal: 16,
   },
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     fontSize: 12,
-    color: '#4B5563',
+    color: '#000000',
     textAlign: 'center',
     lineHeight: 16,
   },

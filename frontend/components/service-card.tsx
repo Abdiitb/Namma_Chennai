@@ -10,12 +10,12 @@ interface ServiceCardProps {
   onPress?: () => void;
 }
 
-export function ServiceCard({ 
-  title, 
-  icon, 
-  iconColor = '#6366F1',
-  iconBgColor = '#EEF2FF',
-  onPress 
+export function ServiceCard({
+  title,
+  icon,
+  iconColor = '#FFD600',
+  iconBgColor = '#1A1A1A',
+  onPress
 }: ServiceCardProps) {
   return (
     <Pressable 
@@ -33,14 +33,14 @@ export function ServiceCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     minHeight: 110,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: '#000000',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#374151',
+    color: '#000000',
     lineHeight: 18,
   },
 });

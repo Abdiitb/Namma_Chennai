@@ -1,7 +1,8 @@
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '@/context/auth-context';
 import { useAuth } from '@/context/auth-context';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider } from '@react-navigation/native';
+import { YellowBlackTheme, ThemeColors } from '@/constants/theme';
 import type { ZeroOptions } from '@rocicorp/zero';
 import { expoSQLiteStoreProvider } from '@rocicorp/zero/expo-sqlite';
 import { ZeroProvider } from '@rocicorp/zero/react';
@@ -13,6 +14,7 @@ import { useEffect, useMemo } from 'react';
 import 'react-native-reanimated';
 import { schema } from '@/zero/schema';
 import { mutators } from '@/zero/mutators';
+
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -31,23 +33,23 @@ export default function RootLayout() {
 function InnerRootLayout({ colorScheme }: { colorScheme: string }) {
   const { user } = useAuth();
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top', 'left', 'right', 'bottom']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: ThemeColors.black }} edges={['top', 'left', 'right', 'bottom']}>
       <ZeroProvider
         schema={schema}
         mutators={mutators}
         userID={user ? user.id : 'anon'}
         auth={user?.token ?? ''}
-        server={Platform.OS === 'web' ? 'http://localhost:4848' : 'http://10.5.48.7:4848'}
+        server={Platform.OS === 'web' ? 'http://localhost:4848' : 'http://10.64.50.83:4848'}
         kvStore={Platform.OS !== 'web' ? expoSQLiteStoreProvider() : 'idb'}
       >
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <ThemeProvider value={YellowBlackTheme}>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(auth)" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="create-ticket" options={{ presentation: 'modal' }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal', headerShown: true }} />
           </Stack>
-          <StatusBar style="auto" />
+          <StatusBar style="light" />
         </ThemeProvider>
       </ZeroProvider>
     </SafeAreaView>

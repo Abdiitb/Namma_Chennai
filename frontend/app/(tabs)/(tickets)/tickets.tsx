@@ -69,7 +69,7 @@ export default function TicketsScreen() {
       <View style={styles.header}>
         <ThemedText style={styles.headerTitle}>My Tickets</ThemedText>
         <Pressable style={styles.filterButton}>
-          <Ionicons name="filter-outline" size={20} color="#6366F1" />
+          <Ionicons name="filter-outline" size={20} color="#FFD600" />
         </Pressable>
       </View>
 
@@ -112,8 +112,8 @@ export default function TicketsScreen() {
           >
             <View style={styles.ticketHeader}>
               <View style={styles.ticketIdContainer}>
-                <View style={[styles.categoryIcon, { backgroundColor: '#EEF2FF' }]}>
-                  <Ionicons name={getCategoryIcon(ticket.category)} size={18} color="#6366F1" />
+                <View style={[styles.categoryIcon, { backgroundColor: '#1A1A1A' }]}>
+                  <Ionicons name={getCategoryIcon(ticket.category)} size={18} color="#FFD600" />
                 </View>
                 <View style={styles.ticketIdTextContainer}>
                   <ThemedText style={styles.ticketId}>{ticket.id}</ThemedText>
@@ -162,7 +162,7 @@ export default function TicketsScreen() {
           router.push('/create-ticket');
         }}
       >
-        <Ionicons name="add" size={28} color="#fff" />
+        <Ionicons name="add" size={28} color="#000000" />
       </Pressable>
     </View>
   );
@@ -171,7 +171,7 @@ export default function TicketsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
@@ -179,25 +179,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#000000',
   },
   headerTitle: {
     fontSize: SCREEN_WIDTH < 375 ? 20 : 24,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#FFD600',
   },
   filterButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#EEF2FF',
+    backgroundColor: '#1A1A1A',
     alignItems: 'center',
     justifyContent: 'center',
   },
   tabsWrapper: {
-    backgroundColor: '#fff',
+    backgroundColor: '#000000',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#1A1A1A',
   },
   tabsScrollView: {
     flexGrow: 0,
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'transparent',
   },
   tabActive: {
-    borderBottomColor: '#6366F1',
+    borderBottomColor: '#FFD600',
   },
   tabText: {
     fontSize: 14,
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   tabTextActive: {
-    color: '#6366F1',
+    color: '#FFD600',
     fontWeight: '600',
   },
   ticketsList: {
@@ -232,12 +232,12 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   ticketCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: SCREEN_WIDTH < 375 ? 12 : 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: '#000000',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -273,12 +273,12 @@ const styles = StyleSheet.create({
   },
   ticketId: {
     fontSize: 12,
-    color: '#6366F1',
+    color: '#000000',
     fontWeight: '600',
   },
   ticketCategory: {
     fontSize: 11,
-    color: '#9CA3AF',
+    color: '#6B7280',
   },
   statusBadge: {
     flexDirection: 'row',
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   ticketTitle: {
     fontSize: SCREEN_WIDTH < 375 ? 14 : 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#000000',
     marginBottom: 4,
   },
   ticketDescription: {
@@ -316,7 +316,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: '#000000',
     flexWrap: 'wrap',
     gap: 8,
   },
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#6B7280',
   },
   priorityBadge: {
     paddingHorizontal: 8,
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#9CA3AF',
+    color: '#6B7280',
     marginTop: 12,
   },
   fab: {
@@ -355,10 +355,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#6366F1',
+    backgroundColor: '#FFD600',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#6366F1',
+    shadowColor: '#FFD600',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

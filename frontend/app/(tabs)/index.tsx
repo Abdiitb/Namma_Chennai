@@ -120,7 +120,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
   },
   scrollView: {
     flex: 1,
@@ -141,12 +141,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#000000',
     marginBottom: 16,
   },
   seeAll: {
     fontSize: 14,
-    color: '#6366F1',
+    color: '#FFD600',
     fontWeight: '500',
   },
   servicesGrid: {
@@ -160,18 +160,18 @@ const styles = StyleSheet.create({
   },
   activityCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: '#000000',
   },
   activityIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#1A1A1A',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   activityTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#000000',
     marginBottom: 2,
   },
   activitySubtitle: {
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   },
   activityTime: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#6B7280',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#6366F1',
+    backgroundColor: '#000000',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -210,12 +210,12 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#FFD600',
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 11,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: '#FFFFFF',
     textAlign: 'center',
   },
 });

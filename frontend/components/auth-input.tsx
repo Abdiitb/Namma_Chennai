@@ -57,16 +57,16 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
+    color: '#000000',
     marginBottom: 8,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#000000',
     borderRadius: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     overflow: 'hidden',
   },
   inputError: {
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     fontSize: 16,
-    color: '#1F2937',
+    color: '#000000',
   },
   eyeButton: {
     padding: 16,

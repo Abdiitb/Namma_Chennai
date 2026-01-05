@@ -39,7 +39,7 @@ export function AuthButton({
       disabled={disabled || loading}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#fff' : '#6366F1'} />
+        <ActivityIndicator color={variant === 'primary' ? '#000000' : '#FFD600'} />
       ) : (
         <ThemedText style={textStyle}>{title}</ThemedText>
       )}
@@ -49,7 +49,7 @@ export function AuthButton({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#6366F1',
+    backgroundColor: '#FFD600',
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   buttonSecondary: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#6366F1',
+    borderColor: '#000000',
   },
   buttonLink: {
     backgroundColor: 'transparent',
@@ -69,15 +69,15 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonText: {
-    color: '#fff',
+    color: '#000000',
     fontSize: 16,
     fontWeight: '600',
   },
   buttonTextSecondary: {
-    color: '#6366F1',
+    color: '#000000',
   },
   buttonTextLink: {
-    color: '#6366F1',
+    color: '#FFD600',
     fontWeight: '500',
   },
 });

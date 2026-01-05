@@ -46,11 +46,9 @@ export default function LoginScreen() {
 
     try {
       await login({ email, password });
-      // Navigate to main app on success
       console.log('Login successful, navigating to main app');
       router.replace('/(tabs)');
     } catch (err) {
-      // Error is handled by the hook
       console.error('Login failed:', err);
     }
   };
@@ -152,11 +150,11 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#6366F1',
+    backgroundColor: '#000000',
   },
   keyboardView: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     marginTop: -20,
@@ -172,7 +170,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#000000',
     marginBottom: 8,
   },
   subtitle: {
@@ -186,9 +184,9 @@ const styles = StyleSheet.create({
     marginTop: -8,
   },
   forgotPasswordText: {
-    color: '#6366F1',
+    color: '#FFD600',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   footer: {
     flexDirection: 'row',
@@ -202,9 +200,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   linkText: {
-    color: '#6366F1',
+    color: '#FFD600',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   helpContainer: {
     flexDirection: 'row',

@@ -36,37 +36,31 @@ export default function RegisterScreen() {
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // Name validation
     if (!name.trim()) {
       newErrors.name = 'Name is required';
     } else if (name.trim().length < 2) {
       newErrors.name = 'Name must be at least 2 characters';
     }
 
-    // Email validation (optional but must be valid if provided)
     if (email && !/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'Please enter a valid email';
     }
 
-    // Phone validation (optional but must be valid if provided)
     if (phone && !/^[0-9]{10}$/.test(phone)) {
       newErrors.phone = 'Please enter a valid 10-digit phone number';
     }
 
-    // At least email or phone is required
     if (!email.trim() && !phone.trim()) {
       newErrors.email = 'Email or phone number is required';
       newErrors.phone = 'Email or phone number is required';
     }
 
-    // Password validation
     if (!password) {
       newErrors.password = 'Password is required';
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
 
-    // Confirm password validation
     if (!confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (password !== confirmPassword) {
@@ -88,7 +82,6 @@ export default function RegisterScreen() {
         password,
         role: 'citizen',
       });
-      // Navigate to main app on success
       router.replace('/(tabs)');
     } catch (err) {
       // Error is handled by the hook
@@ -221,11 +214,11 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#6366F1',
+    backgroundColor: '#000000',
   },
   keyboardView: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     marginTop: -20,
@@ -241,7 +234,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#000000',
     marginBottom: 8,
   },
   subtitle: {
@@ -264,9 +257,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   linkText: {
-    color: '#6366F1',
+    color: '#FFD600',
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   helpContainer: {
     flexDirection: 'row',

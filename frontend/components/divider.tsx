@@ -28,11 +28,11 @@ const styles = StyleSheet.create({
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#000000',
   },
   text: {
     paddingHorizontal: 16,
-    color: '#9CA3AF',
+    color: '#6B7280',
     fontSize: 14,
   },
 });

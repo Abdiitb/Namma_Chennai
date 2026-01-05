@@ -89,7 +89,7 @@ export default function IssuesScreen() {
       <View style={styles.header}>
         <ThemedText style={styles.headerTitle}>Community Issues</ThemedText>
         <Pressable style={styles.addButton}>
-          <Ionicons name="add" size={24} color="#fff" />
+          <Ionicons name="add" size={24} color="#000000" />
         </Pressable>
       </View>
 
@@ -149,7 +149,7 @@ export default function IssuesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
@@ -157,31 +157,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#000000',
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#FFD600',
   },
   addButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#6366F1',
+    backgroundColor: '#FFD600',
     alignItems: 'center',
     justifyContent: 'center',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     marginHorizontal: 16,
     marginVertical: 12,
     paddingHorizontal: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#000000',
   },
   searchIcon: {
     marginRight: 8,
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#1F2937',
+    color: '#000000',
   },
   categoriesContainer: {
     paddingHorizontal: 16,
@@ -203,23 +203,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#000000',
     marginRight: 8,
     gap: 6,
   },
   categoryChipActive: {
-    backgroundColor: '#6366F1',
-    borderColor: '#6366F1',
+    backgroundColor: '#FFD600',
+    borderColor: '#FFD600',
   },
   categoryLabel: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#000000',
     fontWeight: '500',
   },
   categoryLabelActive: {
-    color: '#fff',
+    color: '#000000',
   },
   issuesList: {
     flex: 1,
@@ -229,11 +229,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   issueCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#F3F4F6',
+    borderColor: '#000000',
   },
   issueHeader: {
     flexDirection: 'row',
@@ -252,12 +252,12 @@ const styles = StyleSheet.create({
   },
   timeAgo: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#6B7280',
   },
   issueTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#000000',
     marginBottom: 8,
   },
   locationRow: {
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: '#000000',
   },
   footerItem: {
     flexDirection: 'row',
