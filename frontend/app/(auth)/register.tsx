@@ -14,7 +14,7 @@ import { AuthButton } from '@/components/auth-button';
 import { Divider } from '@/components/divider';
 import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/alert';
-import { useRegister } from '@/hooks/use-auth';
+import { useAuth } from '@/context/auth-context';
 
 interface FormErrors {
   name?: string;
@@ -31,8 +31,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<FormErrors>({});
-  
-  const { register, loading, error, clearError } = useRegister();
+  const { register, loading, error, clearError } = useAuth();
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};

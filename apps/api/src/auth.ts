@@ -33,6 +33,9 @@ export async function comparePassword(password: string, hash: string): Promise<b
 
 export function authMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
+
+  console.log('Auth Header:', authHeader);
+  // console.log('Request in:', req);
   
   if (!authHeader?.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Missing or invalid authorization header' });

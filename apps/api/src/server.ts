@@ -131,6 +131,13 @@ app.post('/api/zero/mutate', authMiddleware, async (req: AuthenticatedRequest, r
 
     console.log('Calling handleMutateRequest...');
     console.log('DB Provider:', dbProvider);
+    // Convert req.query (ParsedQs) to Record<string, string>
+    const queryObj: Record<string, string> = {};
+    for (const key in req.query) {
+      const val = req.query[key];
+      if (typeof val === 'string') queryObj[key] = val;
+      // If you expect arrays, you can join: else if (Array.isArray(val)) queryObj[key] = val.join(',');
+    }
     const result = await handleMutateRequest(
       dbProvider,
       (transact) =>
@@ -143,8 +150,8 @@ app.post('/api/zero/mutate', authMiddleware, async (req: AuthenticatedRequest, r
             args,
           });
         }),
-      req.query,
-      req.body  // Pass the Express request directly
+      queryObj,
+      req.body
     );
     // const jsonBody = await req.body.json();
     // console.log('Mutate request body JSON:', jsonBody);

@@ -4,17 +4,19 @@ import { HomeHeader } from '@/components/home-header';
 import { ServiceCard } from '@/components/service-card';
 import { QuickActions } from '@/components/quick-actions';
 import { ThemedText } from '@/components/themed-text';
-import { useAuthState } from '@/hooks/use-auth';
+import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { SERVICES, QUICK_ACTIONS } from '@/constants/services';
 
 export default function HomeScreen() {
-  const { user, logout } = useAuthState();
+  const { user, logout } = useAuth();
+
+  console.log('HomeScreen rendered for user:', user);
 
   const handleServicePress = (serviceId: string) => {
     // Navigate to appropriate screen based on service
     if (serviceId === '3') {
-      router.push('/(tabs)/tickets');
+      router.push('/(tabs)/(tickets)/tickets');
     } else if (serviceId === '1') {
       router.push('/(tabs)/issues');
     }
@@ -113,6 +115,7 @@ export default function HomeScreen() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Zero cache configuration",
   "scripts": {
-    "dev": "ZERO_AUTH_SECRET=your-jwt-secret-key-here npx zero-cache-dev --upstream-db postgresql://postgres:password@localhost:5432/citizen_services --port 4848 --query-url http://10.5.48.18:3000/api/zero/query --mutate-url http://10.5.48.18:3000/api/zero/mutate",
+    "dev": "ZERO_AUTH_SECRET=your-jwt-secret-key-here npx zero-cache-dev --upstream-db postgresql://postgres:password@localhost:5432/citizen_services --port 4848 --query-url http://10.5.48.7:3000/api/zero/query --mutate-url http://10.5.48.7:3000/api/zero/mutate",
     "start": "ZERO_AUTH_SECRET=your-jwt-secret-key-here npx zero-cache-dev --upstream-db postgresql://postgres:password@localhost:5432/citizen_services --port 4848"
   },
   "dependencies": {

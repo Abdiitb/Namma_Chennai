@@ -84,7 +84,7 @@ export default function IssuesScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <ThemedText style={styles.headerTitle}>Community Issues</ThemedText>
@@ -142,7 +142,7 @@ export default function IssuesScreen() {
           </Pressable>
         ))}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

@@ -1,9 +1,15 @@
-import { View, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { View, StyleSheet, ScrollView, Pressable, Dimensions } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import TicketStatusProgress from '@/components/ticket-status-progress';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useQuery } from '@rocicorp/zero/react';
+import { ZERO_QUERIES } from '@/zero/queries';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isSmallScreen = SCREEN_WIDTH < 375;
+const isMediumScreen = SCREEN_WIDTH >= 375 && SCREEN_WIDTH < 414;
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -53,46 +59,48 @@ const getCategoryColor = (category: string) => {
 
 export default function TicketDetailsScreen() {
   const params = useLocalSearchParams();
-  
+  //   const [ticketStatus, setTicketStatus] = useState(params.status);
+  const ticketStatus = useQuery(ZERO_QUERIES.getTicket({ ticketID: params.id as string }))[0][0]?.status;
+
   if (!params || !params.id) {
     return (
-      <SafeAreaView style={styles.screen} edges={['top']}>
+      <View style={styles.screen}>
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={48} color="#EF4444" />
           <ThemedText style={styles.errorText}>Ticket not found</ThemedText>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
-  const createdAt = params.created_at 
+  const createdAt = params.created_at
     ? new Date(Number(params.created_at)).toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
     : 'N/A';
-    
-  const updatedAt = params.updated_at 
+
+  const updatedAt = params.updated_at
     ? new Date(Number(params.updated_at)).toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
     : 'N/A';
-    
-  const closedAt = params.closed_at 
+
+  const closedAt = params.closed_at
     ? new Date(Number(params.closed_at)).toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
     : null;
 
   const statusColor = getStatusColor(params.status as string);
@@ -100,19 +108,19 @@ export default function TicketDetailsScreen() {
   const categoryColor = getCategoryColor(params.category as string);
 
   return (
-    <SafeAreaView style={styles.screen} edges={['top']}>
+    <View style={styles.screen}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#1F2937" />
+          <Ionicons name="arrow-back" size={22} color="#1F2937" />
         </Pressable>
-        <ThemedText style={styles.headerTitle}>Ticket Details</ThemedText>
+        <ThemedText style={styles.headerTitle} numberOfLines={1}>Ticket Details</ThemedText>
         <Pressable style={styles.moreButton}>
           <Ionicons name="ellipsis-vertical" size={20} color="#6B7280" />
         </Pressable>
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
@@ -123,11 +131,11 @@ export default function TicketDetailsScreen() {
           <View style={styles.cardHeader}>
             <View style={styles.categoryBadge}>
               <View style={[styles.categoryIconBox, { backgroundColor: categoryColor + '15' }]}>
-                <Ionicons name={categoryIcon} size={22} color={categoryColor} />
+                <Ionicons name={categoryIcon} size={isSmallScreen ? 18 : 22} color={categoryColor} />
               </View>
-              <View>
-                <ThemedText style={styles.ticketIdText}>{params.id}</ThemedText>
-                <ThemedText style={styles.categoryText}>{params.category}</ThemedText>
+              <View style={styles.categoryTextContainer}>
+                <ThemedText style={styles.ticketIdText} numberOfLines={1}>{params.id}</ThemedText>
+                <ThemedText style={styles.categoryText} numberOfLines={1}>{params.category}</ThemedText>
               </View>
             </View>
             <View style={[styles.statusBadge, { backgroundColor: statusColor + '15' }]}>
@@ -145,58 +153,58 @@ export default function TicketDetailsScreen() {
           {/* Location */}
           {params.address_text && (
             <View style={styles.locationBox}>
-              <Ionicons name="location" size={18} color="#6366F1" />
+              <Ionicons name="location" size={16} color="#6366F1" />
               <ThemedText style={styles.locationText}>{params.address_text}</ThemedText>
             </View>
           )}
         </View>
 
         {/* Progress Tracker */}
-        <TicketStatusProgress status={params.status as string} />
+        <TicketStatusProgress status={ticketStatus as string} />
 
         {/* Details Grid */}
         <View style={styles.detailsCard}>
           <ThemedText style={styles.sectionTitle}>Ticket Information</ThemedText>
-          
+
           <View style={styles.detailsGrid}>
-            <DetailItem 
-              icon="calendar-outline" 
-              label="Created" 
+            <DetailItem
+              icon="calendar-outline"
+              label="Created"
               value={createdAt}
               iconColor="#6366F1"
             />
-            <DetailItem 
-              icon="time-outline" 
-              label="Last Updated" 
+            <DetailItem
+              icon="time-outline"
+              label="Last Updated"
               value={updatedAt}
               iconColor="#F59E0B"
             />
             {closedAt && (
-              <DetailItem 
-                icon="checkmark-done-outline" 
-                label="Closed" 
+              <DetailItem
+                icon="checkmark-done-outline"
+                label="Closed"
                 value={closedAt}
                 iconColor="#10B981"
               />
             )}
-            <DetailItem 
-              icon="person-outline" 
-              label="Created By" 
+            <DetailItem
+              icon="person-outline"
+              label="Created By"
               value={params.created_by as string || 'N/A'}
               iconColor="#8B5CF6"
             />
             {params.assigned_to && (
-              <DetailItem 
-                icon="people-outline" 
-                label="Assigned To" 
+              <DetailItem
+                icon="people-outline"
+                label="Assigned To"
                 value={params.assigned_to as string}
                 iconColor="#3B82F6"
               />
             )}
             {params.current_supervisor && (
-              <DetailItem 
-                icon="shield-checkmark-outline" 
-                label="Supervisor" 
+              <DetailItem
+                icon="shield-checkmark-outline"
+                label="Supervisor"
                 value={params.current_supervisor as string}
                 iconColor="#EC4899"
               />
@@ -208,7 +216,7 @@ export default function TicketDetailsScreen() {
         {params.status === 'resolved' && (
           <View style={styles.feedbackCard}>
             <ThemedText style={styles.sectionTitle}>Citizen Feedback</ThemedText>
-            
+
             <View style={styles.ratingContainer}>
               <ThemedText style={styles.ratingLabel}>Rating</ThemedText>
               <View style={styles.starsRow}>
@@ -216,13 +224,13 @@ export default function TicketDetailsScreen() {
                   <Ionicons
                     key={star}
                     name={Number(params.citizen_rating) >= star ? 'star' : 'star-outline'}
-                    size={24}
+                    size={isSmallScreen ? 20 : 24}
                     color={Number(params.citizen_rating) >= star ? '#F59E0B' : '#D1D5DB'}
                   />
                 ))}
               </View>
             </View>
-            
+
             {params.citizen_feedback && (
               <View style={styles.feedbackTextBox}>
                 <Ionicons name="chatbubble-ellipses-outline" size={16} color="#6366F1" />
@@ -231,7 +239,7 @@ export default function TicketDetailsScreen() {
                 </ThemedText>
               </View>
             )}
-            
+
             {!params.citizen_rating && !params.citizen_feedback && (
               <View style={styles.noFeedbackBox}>
                 <Ionicons name="chatbubbles-outline" size={24} color="#D1D5DB" />
@@ -245,25 +253,25 @@ export default function TicketDetailsScreen() {
         <View style={styles.actionsContainer}>
           {params.status !== 'resolved' && (
             <Pressable style={styles.primaryButton}>
-              <Ionicons name="chatbubble-outline" size={20} color="#FFFFFF" />
+              <Ionicons name="chatbubble-outline" size={18} color="#FFFFFF" />
               <ThemedText style={styles.primaryButtonText}>Add Comment</ThemedText>
             </Pressable>
           )}
-          
+
           {params.status === 'resolved' && !params.citizen_rating && (
             <Pressable style={styles.primaryButton}>
-              <Ionicons name="star-outline" size={20} color="#FFFFFF" />
+              <Ionicons name="star-outline" size={18} color="#FFFFFF" />
               <ThemedText style={styles.primaryButtonText}>Rate Service</ThemedText>
             </Pressable>
           )}
-          
+
           <Pressable style={styles.secondaryButton}>
-            <Ionicons name="share-outline" size={20} color="#6366F1" />
+            <Ionicons name="share-outline" size={18} color="#6366F1" />
             <ThemedText style={styles.secondaryButtonText}>Share</ThemedText>
           </Pressable>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -278,11 +286,11 @@ function DetailItem({ icon, label, value, iconColor }: DetailItemProps) {
   return (
     <View style={styles.detailItem}>
       <View style={[styles.detailIconBox, { backgroundColor: iconColor + '15' }]}>
-        <Ionicons name={icon} size={16} color={iconColor} />
+        <Ionicons name={icon} size={isSmallScreen ? 14 : 16} color={iconColor} />
       </View>
       <View style={styles.detailTextContainer}>
         <ThemedText style={styles.detailLabel}>{label}</ThemedText>
-        <ThemedText style={styles.detailValue} numberOfLines={1}>{value}</ThemedText>
+        <ThemedText style={styles.detailValue} numberOfLines={2}>{value}</ThemedText>
       </View>
     </View>
   );
@@ -297,37 +305,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: isSmallScreen ? 12 : 16,
+    paddingVertical: 10,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
+    gap: 8,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F9FAFB',
+    flexShrink: 0,
   },
   headerTitle: {
-    fontSize: 18,
+    flex: 1,
+    fontSize: isSmallScreen ? 16 : 18,
     fontWeight: '600',
     color: '#1F2937',
+    textAlign: 'center',
   },
   moreButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   content: {
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
+    padding: isSmallScreen ? 12 : 16,
     paddingBottom: 32,
   },
   errorContainer: {
@@ -343,8 +356,8 @@ const styles = StyleSheet.create({
   },
   mainCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: isSmallScreen ? 12 : 16,
+    padding: isSmallScreen ? 14 : 20,
     borderWidth: 1,
     borderColor: '#F3F4F6',
     shadowColor: '#000',
@@ -357,129 +370,141 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
+    marginBottom: isSmallScreen ? 12 : 16,
+    flexWrap: 'wrap',
+    gap: 8,
   },
   categoryBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: isSmallScreen ? 8 : 12,
+    flex: 1,
+    minWidth: 0,
   },
   categoryIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: isSmallScreen ? 36 : 44,
+    height: isSmallScreen ? 36 : 44,
+    borderRadius: isSmallScreen ? 10 : 12,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
+  },
+  categoryTextContainer: {
+    flex: 1,
+    minWidth: 0,
   },
   ticketIdText: {
-    fontSize: 13,
+    fontSize: isSmallScreen ? 12 : 13,
     fontWeight: '600',
     color: '#6366F1',
   },
   categoryText: {
-    fontSize: 12,
+    fontSize: isSmallScreen ? 11 : 12,
     color: '#9CA3AF',
     marginTop: 2,
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: isSmallScreen ? 8 : 12,
+    paddingVertical: isSmallScreen ? 4 : 6,
     borderRadius: 20,
-    gap: 6,
+    gap: isSmallScreen ? 4 : 6,
+    flexShrink: 0,
   },
   statusDot: {
-    width: 8,
-    height: 8,
+    width: isSmallScreen ? 6 : 8,
+    height: isSmallScreen ? 6 : 8,
     borderRadius: 4,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: isSmallScreen ? 10 : 12,
     fontWeight: '600',
   },
   title: {
-    fontSize: 20,
+    fontSize: isSmallScreen ? 17 : 20,
     fontWeight: '700',
     color: '#1F2937',
     marginBottom: 8,
-    lineHeight: 28,
+    lineHeight: isSmallScreen ? 24 : 28,
   },
   description: {
-    fontSize: 15,
+    fontSize: isSmallScreen ? 14 : 15,
     color: '#6B7280',
-    lineHeight: 22,
+    lineHeight: isSmallScreen ? 20 : 22,
     marginBottom: 16,
   },
   locationBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     backgroundColor: '#EEF2FF',
-    padding: 12,
+    padding: isSmallScreen ? 10 : 12,
     borderRadius: 10,
-    gap: 10,
+    gap: 8,
   },
   locationText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: isSmallScreen ? 12 : 13,
     color: '#4338CA',
-    lineHeight: 20,
+    lineHeight: 18,
   },
   detailsCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: isSmallScreen ? 12 : 16,
+    padding: isSmallScreen ? 14 : 20,
     borderWidth: 1,
     borderColor: '#F3F4F6',
     marginTop: 12,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 13 : 14,
     fontWeight: '600',
     color: '#374151',
-    marginBottom: 16,
+    marginBottom: isSmallScreen ? 12 : 16,
   },
   detailsGrid: {
-    gap: 12,
+    gap: isSmallScreen ? 10 : 12,
   },
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: isSmallScreen ? 10 : 12,
   },
   detailIconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: isSmallScreen ? 32 : 36,
+    height: isSmallScreen ? 32 : 36,
+    borderRadius: isSmallScreen ? 8 : 10,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   detailTextContainer: {
     flex: 1,
+    minWidth: 0,
   },
   detailLabel: {
-    fontSize: 11,
+    fontSize: isSmallScreen ? 10 : 11,
     color: '#9CA3AF',
     fontWeight: '500',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: isSmallScreen ? 13 : 14,
     color: '#374151',
     fontWeight: '500',
     marginTop: 2,
   },
   feedbackCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: isSmallScreen ? 12 : 16,
+    padding: isSmallScreen ? 14 : 20,
     borderWidth: 1,
     borderColor: '#F3F4F6',
     marginTop: 12,
   },
   ratingContainer: {
-    marginBottom: 16,
+    marginBottom: isSmallScreen ? 12 : 16,
   },
   ratingLabel: {
     fontSize: 12,
@@ -489,19 +514,19 @@ const styles = StyleSheet.create({
   },
   starsRow: {
     flexDirection: 'row',
-    gap: 4,
+    gap: isSmallScreen ? 2 : 4,
   },
   feedbackTextBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     backgroundColor: '#F9FAFB',
-    padding: 14,
+    padding: isSmallScreen ? 12 : 14,
     borderRadius: 10,
-    gap: 10,
+    gap: 8,
   },
   feedbackText: {
     flex: 1,
-    fontSize: 14,
+    fontSize: isSmallScreen ? 13 : 14,
     color: '#374151',
     fontStyle: 'italic',
     lineHeight: 20,
@@ -517,18 +542,18 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   actionsContainer: {
-    flexDirection: 'row',
+    flexDirection: isSmallScreen ? 'column' : 'row',
     gap: 12,
     marginTop: 20,
   },
   primaryButton: {
-    flex: 1,
+    flex: isSmallScreen ? undefined : 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#6366F1',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingVertical: isSmallScreen ? 12 : 14,
+    paddingHorizontal: isSmallScreen ? 16 : 20,
     borderRadius: 12,
     gap: 8,
     shadowColor: '#6366F1',
@@ -538,7 +563,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   primaryButtonText: {
-    fontSize: 15,
+    fontSize: isSmallScreen ? 14 : 15,
     fontWeight: '600',
     color: '#FFFFFF',
   },
@@ -547,13 +572,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#EEF2FF',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
+    paddingVertical: isSmallScreen ? 12 : 14,
+    paddingHorizontal: isSmallScreen ? 16 : 20,
     borderRadius: 12,
     gap: 8,
   },
   secondaryButtonText: {
-    fontSize: 15,
+    fontSize: isSmallScreen ? 14 : 15,
     fontWeight: '600',
     color: '#6366F1',
   },

@@ -1,7 +1,7 @@
 // Define queries locally to avoid module resolution issues  
 import { defineQueries, defineQuery } from '@rocicorp/zero';
 import { z } from 'zod';
-import { zql } from './schema';
+import { users, zql } from './schema';
 
 // Try simple direct queries without parameters first
 export const simpleQueries = {
@@ -10,6 +10,29 @@ export const simpleQueries = {
 };
 
 export const ZERO_QUERIES = defineQueries({
+  allUsers: defineQuery(
+    () => zql.users.orderBy('id', 'asc')
+  ),
+
+  usersByRole: defineQuery(
+    z.object({
+      role: z.string(),
+    }),
+    ({ args: { role } }) =>
+      zql.users
+        .where('role', role)
+        .orderBy('name', 'asc')
+  ),
+
+  getTicket: defineQuery(
+    z.object({
+      ticketID: z.string(),
+    }),
+    ({ args: { ticketID } }) =>
+      zql.tickets
+        .where('id', ticketID)
+  ),
+
   // Simple query to get all tickets (for development/testing)
   allTickets: defineQuery(
     () => zql.tickets.orderBy('created_at', 'desc')

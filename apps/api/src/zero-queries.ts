@@ -3,6 +3,29 @@ import { z } from 'zod';
 import { zql } from './schema';
 
 export const ZERO_QUERIES = defineQueries({
+  getTicket: defineQuery(
+    z.object({
+      ticketID: z.string(),
+    }),
+    ({ args: { ticketID } }) =>
+      zql.tickets
+        .where('id', ticketID)
+  ),
+
+  allUsers: defineQuery(
+    () => zql.users.orderBy('id', 'asc')
+  ),
+
+  usersByRole: defineQuery(
+    z.object({
+      role: z.string(),
+    }),
+    ({ args: { role } }) =>
+      zql.users
+        .where('role', role)
+        .orderBy('name', 'asc')
+  ),
+
   // Simple query to get all tickets (for development/testing)
   allTickets: defineQuery(
     () => zql.tickets.orderBy('created_at', 'desc')

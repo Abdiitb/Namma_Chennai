@@ -17,7 +17,7 @@ import { AuthInput } from '@/components/auth-input';
 import { AuthButton } from '@/components/auth-button';
 import { Alert } from '@/components/alert';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuthState } from '@/hooks/use-auth';
+import { useAuth } from '@/context/auth-context';
 import { Icon } from 'react-native-screens';
 import { mutators } from '@/zero/mutators';
 import { useZero } from '@rocicorp/zero/react';
@@ -33,7 +33,7 @@ const CATEGORIES = [
 ];
 
 export default function CreateTicketScreen() {
-    const { user } = useAuthState();
+    const { user } = useAuth();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('');

@@ -14,14 +14,15 @@ import { AuthButton } from '@/components/auth-button';
 import { Divider } from '@/components/divider';
 import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/alert';
-import { useLogin } from '@/hooks/use-auth';
+
+import { useAuth } from '@/context/auth-context';
+
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  
-  const { login, loading, error, clearError } = useLogin();
+  const { login, loading, error, clearError } = useAuth();
 
   const validate = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -46,6 +47,7 @@ export default function LoginScreen() {
     try {
       await login({ email, password });
       // Navigate to main app on success
+      console.log('Login successful, navigating to main app');
       router.replace('/(tabs)');
     } catch (err) {
       // Error is handled by the hook
@@ -145,6 +147,7 @@ export default function LoginScreen() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

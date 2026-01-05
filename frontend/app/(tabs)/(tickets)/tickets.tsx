@@ -1,11 +1,14 @@
-import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable, Dimensions } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ZERO_QUERIES } from '@/zero/queries';
-import {useQuery} from '@rocicorp/zero/react'
+import { useQuery } from '@rocicorp/zero/react';
+import { useAuth } from '@/context/auth-context';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const TABS = ['All', 'Assigned', 'In Progress', 'Waiting Supervisor', 'Resolved'];
 
@@ -48,7 +51,8 @@ const getCategoryIcon = (category: string): keyof typeof Ionicons.glyphMap => {
 
 export default function TicketsScreen() {
   const [selectedTab, setSelectedTab] = useState('All');
-  const [tickets] = useQuery(ZERO_QUERIES.allTickets());
+  const { user } = useAuth();
+  const [tickets] = useQuery(ZERO_QUERIES.myTickets({userID: user?.id || ''}));
 
   console.log('Fetched tickets:', tickets);
 
@@ -60,7 +64,7 @@ export default function TicketsScreen() {
   console.log('Filtered tickets for tab', selectedTab, ':', filteredTickets);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <ThemedText style={styles.headerTitle}>My Tickets</ThemedText>
@@ -69,19 +73,26 @@ export default function TicketsScreen() {
         </Pressable>
       </View>
 
-      {/* Tabs */}
-      <View style={styles.tabsContainer}>
-        {TABS.map((tab) => (
-          <Pressable
-            key={tab}
-            style={[styles.tab, selectedTab === tab && styles.tabActive]}
-            onPress={() => setSelectedTab(tab)}
-          >
-            <ThemedText style={[styles.tabText, selectedTab === tab && styles.tabTextActive]}>
-              {tab}
-            </ThemedText>
-          </Pressable>
-        ))}
+      {/* Scrollable Tabs */}
+      <View style={styles.tabsWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabsContentContainer}
+          style={styles.tabsScrollView}
+        >
+          {TABS.map((tab) => (
+            <Pressable
+              key={tab}
+              style={[styles.tab, selectedTab === tab && styles.tabActive]}
+              onPress={() => setSelectedTab(tab)}
+            >
+              <ThemedText style={[styles.tabText, selectedTab === tab && styles.tabTextActive]}>
+                {tab}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </ScrollView>
       </View>
 
       {/* Tickets List */}
@@ -95,7 +106,7 @@ export default function TicketsScreen() {
             key={ticket.id}
             style={styles.ticketCard}
             onPress={() => router.push({
-              pathname: '/(tabs)/ticket-details',
+              pathname: '/ticket-details',
               params: ticket
             })}
           >
@@ -104,7 +115,7 @@ export default function TicketsScreen() {
                 <View style={[styles.categoryIcon, { backgroundColor: '#EEF2FF' }]}>
                   <Ionicons name={getCategoryIcon(ticket.category)} size={18} color="#6366F1" />
                 </View>
-                <View>
+                <View style={styles.ticketIdTextContainer}>
                   <ThemedText style={styles.ticketId}>{ticket.id}</ThemedText>
                   <ThemedText style={styles.ticketCategory}>{ticket.category}</ThemedText>
                 </View>
@@ -117,7 +128,7 @@ export default function TicketsScreen() {
               </View>
             </View>
 
-            <ThemedText style={styles.ticketTitle}>{ticket.title}</ThemedText>
+            <ThemedText style={styles.ticketTitle} numberOfLines={2}>{ticket.title}</ThemedText>
             <ThemedText style={styles.ticketDescription} numberOfLines={2}>
               {ticket.description}
             </ThemedText>
@@ -153,7 +164,7 @@ export default function TicketsScreen() {
       >
         <Ionicons name="add" size={28} color="#fff" />
       </Pressable>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -167,11 +178,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 12,
     backgroundColor: '#fff',
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: SCREEN_WIDTH < 375 ? 20 : 24,
     fontWeight: 'bold',
     color: '#1F2937',
   },
@@ -183,42 +194,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  statsContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    gap: 12,
-  },
-  statCard: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    minWidth: 80,
-    marginRight: 12,
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginTop: 4,
-  },
-  tabsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
+  tabsWrapper: {
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: '#E5E7EB',
+  },
+  tabsScrollView: {
+    flexGrow: 0,
+  },
+  tabsContentContainer: {
+    paddingHorizontal: 12,
   },
   tab: {
     paddingVertical: 12,
     paddingHorizontal: 16,
-    marginRight: 8,
+    marginHorizontal: 4,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
   },
   tabActive: {
-    borderBottomWidth: 2,
     borderBottomColor: '#6366F1',
   },
   tabText: {
@@ -228,31 +222,46 @@ const styles = StyleSheet.create({
   },
   tabTextActive: {
     color: '#6366F1',
+    fontWeight: '600',
   },
   ticketsList: {
     flex: 1,
   },
   ticketsContent: {
-    padding: 16,
-    gap: 12,
+    padding: SCREEN_WIDTH < 375 ? 12 : 16,
+    paddingBottom: 100,
   },
   ticketCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
+    padding: SCREEN_WIDTH < 375 ? 12 : 16,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: '#F3F4F6',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   ticketHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 12,
+    flexWrap: 'wrap',
+    gap: 8,
   },
   ticketIdContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    flex: 1,
+    minWidth: 0,
+  },
+  ticketIdTextContainer: {
+    flex: 1,
+    minWidth: 0,
   },
   categoryIcon: {
     width: 36,
@@ -260,6 +269,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   ticketId: {
     fontSize: 12,
@@ -277,6 +287,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
     gap: 6,
+    flexShrink: 0,
   },
   statusDot: {
     width: 6,
@@ -284,17 +295,17 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: SCREEN_WIDTH < 375 ? 10 : 12,
     fontWeight: '600',
   },
   ticketTitle: {
-    fontSize: 16,
+    fontSize: SCREEN_WIDTH < 375 ? 14 : 16,
     fontWeight: '600',
     color: '#1F2937',
     marginBottom: 4,
   },
   ticketDescription: {
-    fontSize: 14,
+    fontSize: SCREEN_WIDTH < 375 ? 13 : 14,
     color: '#6B7280',
     lineHeight: 20,
     marginBottom: 12,
@@ -306,6 +317,8 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: '#F3F4F6',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   footerItem: {
     flexDirection: 'row',
@@ -338,7 +351,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     bottom: 24,
-    right: 24,
+    right: SCREEN_WIDTH < 375 ? 16 : 24,
     width: 56,
     height: 56,
     borderRadius: 28,

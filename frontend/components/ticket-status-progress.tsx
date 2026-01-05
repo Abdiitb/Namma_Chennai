@@ -2,7 +2,7 @@ import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { Ionicons } from '@expo/vector-icons';
 
-type TicketStatus = 'open' | 'assigned' | 'in_progress' | 'waiting_supervisor' | 'resolved';
+type TicketStatus = 'new' | 'assigned' | 'in_progress' | 'waiting_supervisor' | 'resolved';
 
 interface StatusStep {
   key: TicketStatus;
@@ -11,7 +11,7 @@ interface StatusStep {
 }
 
 const STATUS_STEPS: StatusStep[] = [
-  { key: 'open', label: 'New', icon: 'add-circle-outline' },
+  { key: 'new', label: 'New', icon: 'add-circle-outline' },
   { key: 'assigned', label: 'Assigned', icon: 'person-outline' },
   { key: 'in_progress', label: 'In Progress', icon: 'construct-outline' },
   { key: 'waiting_supervisor', label: 'Review', icon: 'eye-outline' },
@@ -27,7 +27,7 @@ interface TicketStatusProgressProps {
   status: string;
 }
 
-export default function TicketStatusProgress({ status }: TicketStatusProgressProps) {
+export default function TicketStatusProgress({ status, }: TicketStatusProgressProps) {
   const currentIndex = getStatusIndex(status);
 
   return (

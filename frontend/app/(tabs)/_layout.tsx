@@ -1,13 +1,31 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { router, Tabs } from 'expo-router';
+import React, { useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-
 import { HapticTab } from '@/components/haptic-tab';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useAuth } from '@/context/auth-context';
+import { ActivityIndicator, View } from 'react-native';
 
 export default function TabLayout() {
+
   const colorScheme = useColorScheme();
+  const { user } = useAuth();
+
+  console.log('TabLayout rendered. User:', user, 'Color Scheme:', colorScheme);
+
+  console.log('User:', user)
+
+  useEffect(() => {
+    if (!user) {
+      console.log('No user found, redirecting to /auth');
+      router.replace('/(auth)');
+    }
+  }, [user]);
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <Tabs
@@ -45,17 +63,10 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'warning' : 'warning-outline'} size={24} color={color} />
           ),
+
         }}
       />
-      <Tabs.Screen
-        name="tickets"
-        options={{
-          title: 'Tickets',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={24} color={color} />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="explore"
         options={{
@@ -64,7 +75,37 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="ticket-details"
+        name="(tickets)/ticket-details"
+        options={{
+          href: null, // This hides it from the tab bar
+        }}
+      />
+      {/* Only show the relevant ticket tab for each role */}
+      {user?.role === 'citizen' && (
+        <Tabs.Screen
+          name="(tickets)/tickets"
+          options={{
+            title: 'Tickets',
+            tabBarIcon: ({ color, focused }) => (
+              <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={24} color={color} />
+            ),
+          }}
+        />
+      )}
+      {user?.role !== 'citizen' && (
+        <Tabs.Screen
+          name="(tickets)/tickets-assigned"
+          options={{
+            title: 'Tickets',
+            tabBarIcon: ({ color, focused }) => (
+              <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={24} color={color} />
+            ),
+          }}
+        />
+      )}
+
+      <Tabs.Screen
+        name="(tickets)/assigned-ticket-detail"
         options={{
           href: null, // This hides it from the tab bar
         }}
