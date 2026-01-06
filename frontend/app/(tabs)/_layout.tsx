@@ -80,29 +80,30 @@ export default function TabLayout() {
           href: null, // This hides it from the tab bar
         }}
       />
-      {/* Only show the relevant ticket tab for each role */}
-      {user?.role === 'citizen' && (
-        <Tabs.Screen
-          name="(tickets)/tickets"
-          options={{
-            title: 'Tickets',
-            tabBarIcon: ({ color, focused }) => (
-              <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={24} color={color} />
-            ),
-          }}
-        />
-      )}
-      {user?.role !== 'citizen' && (
-        <Tabs.Screen
-          name="(tickets)/tickets-assigned"
-          options={{
-            title: 'Tickets',
-            tabBarIcon: ({ color, focused }) => (
-              <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={24} color={color} />
-            ),
-          }}
-        />
-      )}
+
+      {/* Citizen: Show "My Tickets" tab */}
+      <Tabs.Screen
+        name="(tickets)/tickets"
+        options={{
+          title: 'My Tickets',
+          href: user?.role === 'citizen' ? '/(tabs)/(tickets)/tickets' : null,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={24} color={color} />
+          ),
+        }}
+      />
+
+      {/* Staff/Supervisor: Show "Assigned Tickets" tab */}
+      <Tabs.Screen
+        name="(tickets)/tickets-assigned"
+        options={{
+          title: 'Tickets',
+          href: user?.role !== 'citizen' ? '/(tabs)/(tickets)/tickets-assigned' : null,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={24} color={color} />
+          ),
+        }}
+      />
 
       <Tabs.Screen
         name="(tickets)/assigned-ticket-detail"

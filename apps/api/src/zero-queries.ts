@@ -12,6 +12,16 @@ export const ZERO_QUERIES = defineQueries({
         .where('id', ticketID)
   ),
 
+  getTicketAttachments: defineQuery(
+    z.object({
+      ticketID: z.string(),
+    }),
+    ({ args: { ticketID } }) =>
+      zql.ticket_attachments
+        .where('ticket_id', ticketID)
+        .orderBy('created_at', 'asc')
+  ),
+
   allUsers: defineQuery(
     () => zql.users.orderBy('id', 'asc')
   ),
@@ -68,5 +78,13 @@ export const ZERO_QUERIES = defineQueries({
     }),
     ({ args: { ticketId } }) =>
       zql.tickets.where('id', ticketId)
+  ),
+
+  getUser: defineQuery(
+    z.object({
+      userID: z.string(),
+    }),
+    ({ args: { userID } }) =>
+      zql.users.where('id', userID)
   ),
 });

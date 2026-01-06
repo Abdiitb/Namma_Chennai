@@ -1,3 +1,9 @@
 node_modules
 .claude
 ZERO_SYNC_FIX.md
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+*.db-wal2

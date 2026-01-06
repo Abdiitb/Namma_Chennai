@@ -10,7 +10,7 @@ import { useAuth } from '@/context/auth-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const TABS = ['All', 'Assigned', 'In Progress', 'Waiting Supervisor', 'Resolved'];
+const TABS = ['All', 'New', 'Assigned', 'In Progress', 'Waiting Supervisor', 'Resolved'];
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -49,6 +49,18 @@ const getCategoryIcon = (category: string): keyof typeof Ionicons.glyphMap => {
   }
 };
 
+const formatDateTime = (timestamp: number): string => {
+  if (!timestamp) return 'N/A';
+  return new Date(timestamp).toLocaleDateString('en-IN', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+};
+
 export default function TicketsScreen() {
   const [selectedTab, setSelectedTab] = useState('All');
   const { user } = useAuth();
@@ -59,7 +71,7 @@ export default function TicketsScreen() {
 
   const filteredTickets = tickets.filter(ticket => {
     if (selectedTab === 'All') return true;
-    return getStatusLabel(ticket.status) === selectedTab.toLowerCase();
+    return getStatusLabel(ticket.status) === selectedTab.toLowerCase().replace(' ', '_');
   });
 
   console.log('Filtered tickets for tab', selectedTab, ':', filteredTickets);
@@ -137,7 +149,7 @@ export default function TicketsScreen() {
             <View style={styles.ticketFooter}>
               <View style={styles.footerItem}>
                 <Ionicons name="calendar-outline" size={14} color="#9CA3AF" />
-                <ThemedText style={styles.footerText}>{ticket.created_at}</ThemedText>
+                <ThemedText style={styles.footerText}>{formatDateTime(ticket.created_at)}</ThemedText>
               </View>
               {/* <View style={[styles.priorityBadge, { backgroundColor: getPriorityColor(ticket.priority) + '20' }]}>
                 <ThemedText style={[styles.priorityText, { color: getPriorityColor(ticket.priority) }]}>

@@ -1,10 +1,10 @@
-import { View, StyleSheet, ScrollView, Pressable, Dimensions } from 'react-native';
+import { View, StyleSheet, ScrollView, Pressable, Dimensions, Image, Modal } from 'react-native';
+import { useState } from 'react';
 import { TicketStaffActions } from '@/components/TicketStaffActions';
 import { ThemedText } from '@/components/themed-text';
 import TicketStatusProgress from '@/components/ticket-status-progress';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useState } from 'react';
 import { useQuery } from '@rocicorp/zero/react';
 import { ZERO_QUERIES } from '@/zero/queries';
 
@@ -54,10 +54,24 @@ export default function TicketDetailsScreen() {
     const params = useLocalSearchParams();
     //   const [ticketStatus, setTicketStatus] = useState(params.status);
     const ticketStatus = useQuery(ZERO_QUERIES.getTicket({ ticketID: params.id as string }))[0][0]?.status;
+    const [ticketAttachments] = useQuery(ZERO_QUERIES.getTicketAttachments({ ticketID: params.id as string }));
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-    // const ticketStatus = ticket[0]?.status || params.status;
+    // Fetch user names for created_by, assigned_to, and current_supervisor
+    const [createdByUser] = useQuery(
+        ZERO_QUERIES.getUser({ userID: (params.created_by as string) || '' })
+    );
+    const [assignedToUser] = useQuery(
+        ZERO_QUERIES.getUser({ userID: (params.assigned_to as string) || '' })
+    );
+    const [supervisorUser] = useQuery(
+        ZERO_QUERIES.getUser({ userID: (params.current_supervisor as string) || '' })
+    );
 
-    console.log('ticketStatus:', ticketStatus);
+    const createdByName = createdByUser?.[0]?.name || (params.created_by as string) || 'N/A';
+    const assignedToName = assignedToUser?.[0]?.name || (params.assigned_to as string);
+    const supervisorName = supervisorUser?.[0]?.name || (params.current_supervisor as string);
+
     // TODO: Replace with actual user context
     const actorId = params.assigned_to as string || params.created_by as string || '';
 
@@ -158,6 +172,56 @@ export default function TicketDetailsScreen() {
                     )}
                 </View>
 
+                {/* Attachments */}
+                {ticketAttachments && ticketAttachments.length > 0 && (
+                    <View style={styles.attachmentsCard}>
+                        <ThemedText style={styles.sectionTitle}>Attachments</ThemedText>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.attachmentsContainer}
+                        >
+                            {ticketAttachments.map((attachment, index) => (
+                                <Pressable
+                                    key={attachment.id || index}
+                                    style={styles.attachmentItem}
+                                    onPress={() => setSelectedImage(attachment.url)}
+                                >
+                                    <Image
+                                        source={{ uri: attachment.url }}
+                                        style={styles.attachmentImage}
+                                        resizeMode="cover"
+                                    />
+                                </Pressable>
+                            ))}
+                        </ScrollView>
+                    </View>
+                )}
+
+                {/* Image Viewer Modal */}
+                <Modal
+                    visible={selectedImage !== null}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setSelectedImage(null)}
+                >
+                    <View style={styles.modalContainer}>
+                        <Pressable
+                            style={styles.modalCloseButton}
+                            onPress={() => setSelectedImage(null)}
+                        >
+                            <Ionicons name="close" size={28} color="#FFFFFF" />
+                        </Pressable>
+                        {selectedImage && (
+                            <Image
+                                source={{ uri: selectedImage }}
+                                style={styles.modalImage}
+                                resizeMode="contain"
+                            />
+                        )}
+                    </View>
+                </Modal>
+
                 {/* Progress Tracker */}
                 {/* <TicketStatusProgress status={params.status as string} /> */}
                 <TicketStatusProgress status={ticketStatus as string} />
@@ -190,14 +254,14 @@ export default function TicketDetailsScreen() {
                         <DetailItem
                             icon="person-outline"
                             label="Created By"
-                            value={params.created_by as string || 'N/A'}
+                            value={createdByName}
                             iconColor="#FFD600"
                         />
                         {params.assigned_to && (
                             <DetailItem
                                 icon="people-outline"
                                 label="Assigned To"
-                                value={params.assigned_to as string}
+                                value={assignedToName}
                                 iconColor="#FFD600"
                             />
                         )}
@@ -205,7 +269,7 @@ export default function TicketDetailsScreen() {
                             <DetailItem
                                 icon="shield-checkmark-outline"
                                 label="Supervisor"
-                                value={params.current_supervisor as string}
+                                value={supervisorName}
                                 iconColor="#FFD600"
                             />
                         )}
@@ -447,6 +511,50 @@ const styles = StyleSheet.create({
         fontSize: isSmallScreen ? 12 : 13,
         color: '#FFD600',
         lineHeight: 18,
+    },
+    attachmentsCard: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: isSmallScreen ? 12 : 16,
+        padding: isSmallScreen ? 14 : 20,
+        borderWidth: 1,
+        borderColor: '#000000',
+        marginTop: 12,
+    },
+    attachmentsContainer: {
+        gap: 12,
+    },
+    attachmentItem: {
+        borderRadius: 12,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    attachmentImage: {
+        width: isSmallScreen ? 180 : 220,
+        height: isSmallScreen ? 140 : 170,
+        backgroundColor: '#F3F4F6',
+    },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalCloseButton: {
+        position: 'absolute',
+        top: 50,
+        right: 20,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10,
+    },
+    modalImage: {
+        width: SCREEN_WIDTH - 32,
+        height: '80%',
     },
     detailsCard: {
         backgroundColor: '#FFFFFF',

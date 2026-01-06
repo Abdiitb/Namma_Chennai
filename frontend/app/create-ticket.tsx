@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { AuthInput } from '@/components/auth-input';
 import { AuthButton } from '@/components/auth-button';
+import { LocationInput } from '@/components/location-input';
 import { Alert } from '@/components/alert';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/auth-context';
@@ -327,19 +328,16 @@ export default function CreateTicketScreen() {
 
                     {/* Location */}
                     <View style={styles.section}>
-                        <AuthInput
-                            label="Location *"
-                            placeholder="Enter address or landmark"
+                        <LocationInput
                             value={addressText}
-                            onChangeText={setAddressText}
+                            onLocationSelect={(address, latitude, longitude) => {
+                                setAddressText(address);
+                                setLat(latitude || null);
+                                setLng(longitude || null);
+                            }}
                             error={errors.address}
+                            placeholder="Search for address or landmark"
                         />
-                        <Pressable style={styles.locationButton}>
-                            <Ionicons name="location-outline" size={18} color="#6366F1" />
-                            <ThemedText style={styles.locationButtonText}>
-                                Use Current Location
-                            </ThemedText>
-                        </Pressable>
                     </View>
 
                     {/* Photo Upload */}
@@ -540,17 +538,6 @@ const styles = StyleSheet.create({
         color: '#9CA3AF',
         textAlign: 'right',
         marginTop: 4,
-    },
-    locationButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        marginTop: 8,
-    },
-    locationButtonText: {
-        fontSize: 14,
-        color: '#6366F1',
-        fontWeight: '500',
     },
     photoPreviewContainer: {
         flexDirection: 'row',
