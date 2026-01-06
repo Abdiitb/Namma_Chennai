@@ -38,6 +38,19 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Allow Namma Chennai to access your camera to take photos for ticket attachments.",
+          "photosPermission": "Allow Namma Chennai to access your photos to attach images to tickets."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Namma Chennai to access your location to auto-fill ticket address."
+        }
       ]
     ],
     "experiments": {

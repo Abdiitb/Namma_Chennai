@@ -1,4 +1,4 @@
-import { View, StyleSheet, ScrollView, Pressable, Dimensions, Image, Modal } from 'react-native';
+import { View, StyleSheet, ScrollView, Pressable, Dimensions, Image, Modal, Alert as RNAlert } from 'react-native';
 import { useState } from 'react';
 import { ThemedText } from '@/components/themed-text';
 import TicketStatusProgress from '@/components/ticket-status-progress';
@@ -7,6 +7,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@rocicorp/zero/react';
 import { ZERO_QUERIES } from '@/zero/queries';
+import * as ImagePicker from 'expo-image-picker';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const isSmallScreen = SCREEN_WIDTH < 375;
@@ -56,6 +57,95 @@ export default function TicketDetailsScreen() {
   const ticketStatus = useQuery(ZERO_QUERIES.getTicket({ ticketID: params.id as string }))[0][0]?.status;
   const [ticketAttachments] = useQuery(ZERO_QUERIES.getTicketAttachments({ ticketID: params.id as string }));
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [newPhotos, setNewPhotos] = useState<string[]>([]);
+  const [showPhotoOptions, setShowPhotoOptions] = useState(false);
+
+  // Request media library permissions
+  const requestMediaLibraryPermission = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      RNAlert.alert(
+        'Permission Required',
+        'Media library permission is required to select photos.',
+        [{ text: 'OK' }]
+      );
+      return false;
+    }
+    return true;
+  };
+
+  // Take photo with camera
+  const handleTakePhoto = async () => {
+    setShowPhotoOptions(false);
+
+    // Check if camera is available
+    const cameraAvailable = await ImagePicker.getCameraPermissionsAsync();
+    if (!cameraAvailable.granted) {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        RNAlert.alert(
+          'Permission Required',
+          'Camera permission is required to take photos.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+    }
+
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+        cameraType: ImagePicker.CameraType.back,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setNewPhotos([...newPhotos, result.assets[0].uri]);
+        // TODO: Upload photo and add to ticket attachments
+        RNAlert.alert('Success', 'Photo added successfully!');
+      }
+    } catch (error) {
+      console.error('Error taking photo:', error);
+      RNAlert.alert(
+        'Camera Not Available',
+        'Unable to access camera. This may happen on simulators. Please use "Choose from Gallery" instead.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  // Select photo from gallery
+  const handleSelectFromGallery = async () => {
+    setShowPhotoOptions(false);
+    const hasPermission = await requestMediaLibraryPermission();
+    if (!hasPermission) return;
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsMultipleSelection: true,
+        selectionLimit: 5 - newPhotos.length,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets.length > 0) {
+        const selectedPhotos = result.assets.map(asset => asset.uri);
+        setNewPhotos([...newPhotos, ...selectedPhotos].slice(0, 5));
+        // TODO: Upload photos and add to ticket attachments
+        RNAlert.alert('Success', 'Photo(s) added successfully!');
+      }
+    } catch (error) {
+      console.error('Error selecting photos:', error);
+      RNAlert.alert('Error', 'Failed to select photos. Please try again.');
+    }
+  };
+
+  // Remove new photo
+  const handleRemoveNewPhoto = (index: number) => {
+    setNewPhotos(newPhotos.filter((_, i) => i !== index));
+  };
 
   // Fetch user names for created_by, assigned_to, and current_supervisor
   const [createdByUser] = useQuery(
@@ -170,15 +260,28 @@ export default function TicketDetailsScreen() {
         </View>
 
         {/* Attachments */}
-        {ticketAttachments && ticketAttachments.length > 0 && (
-          <View style={styles.attachmentsCard}>
-            <ThemedText style={styles.sectionTitle}>Attachments</ThemedText>
+        <View style={styles.attachmentsCard}>
+          <View style={styles.attachmentsHeader}>
+            <ThemedText style={[styles.sectionTitle, { marginBottom: 0 }]}>Attachments</ThemedText>
+            {params.status !== 'resolved' && (
+              <Pressable
+                style={styles.addPhotoButton}
+                onPress={() => setShowPhotoOptions(true)}
+              >
+                <Ionicons name="camera-outline" size={18} color="#FFD600" />
+                <ThemedText style={styles.addPhotoButtonText}>Add Photo</ThemedText>
+              </Pressable>
+            )}
+          </View>
+
+          {((ticketAttachments && ticketAttachments.length > 0) || newPhotos.length > 0) ? (
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.attachmentsContainer}
             >
-              {ticketAttachments.map((attachment, index) => (
+              {/* Existing attachments */}
+              {ticketAttachments?.map((attachment, index) => (
                 <Pressable
                   key={attachment.id || index}
                   style={styles.attachmentItem}
@@ -191,9 +294,70 @@ export default function TicketDetailsScreen() {
                   />
                 </Pressable>
               ))}
+              {/* New photos */}
+              {newPhotos.map((uri, index) => (
+                <View key={`new-${index}`} style={styles.attachmentItem}>
+                  <Pressable onPress={() => setSelectedImage(uri)}>
+                    <Image
+                      source={{ uri }}
+                      style={styles.attachmentImage}
+                      resizeMode="cover"
+                    />
+                  </Pressable>
+                  <Pressable
+                    style={styles.removePhotoButton}
+                    onPress={() => handleRemoveNewPhoto(index)}
+                  >
+                    <Ionicons name="close-circle" size={24} color="#EF4444" />
+                  </Pressable>
+                </View>
+              ))}
             </ScrollView>
-          </View>
-        )}
+          ) : (
+            <View style={styles.noAttachmentsBox}>
+              <Ionicons name="images-outline" size={32} color="#D1D5DB" />
+              <ThemedText style={styles.noAttachmentsText}>No attachments yet</ThemedText>
+            </View>
+          )}
+        </View>
+
+        {/* Photo Options Modal */}
+        <Modal
+          visible={showPhotoOptions}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowPhotoOptions(false)}
+        >
+          <Pressable
+            style={styles.photoOptionsOverlay}
+            onPress={() => setShowPhotoOptions(false)}
+          >
+            <View style={styles.photoOptionsContainer}>
+              <ThemedText style={styles.photoOptionsTitle}>Add Photo</ThemedText>
+
+              <Pressable style={styles.photoOption} onPress={handleTakePhoto}>
+                <View style={styles.photoOptionIcon}>
+                  <Ionicons name="camera" size={24} color="#FFD600" />
+                </View>
+                <ThemedText style={styles.photoOptionText}>Take Photo</ThemedText>
+              </Pressable>
+
+              <Pressable style={styles.photoOption} onPress={handleSelectFromGallery}>
+                <View style={styles.photoOptionIcon}>
+                  <Ionicons name="images" size={24} color="#FFD600" />
+                </View>
+                <ThemedText style={styles.photoOptionText}>Choose from Gallery</ThemedText>
+              </Pressable>
+
+              <Pressable
+                style={styles.photoOptionCancel}
+                onPress={() => setShowPhotoOptions(false)}
+              >
+                <ThemedText style={styles.photoOptionCancelText}>Cancel</ThemedText>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Modal>
 
         {/* Image Viewer Modal */}
         <Modal
@@ -516,6 +680,26 @@ const styles = StyleSheet.create({
     borderColor: '#000000',
     marginTop: 12,
   },
+  attachmentsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: isSmallScreen ? 12 : 16,
+  },
+  addPhotoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#1A1A1A',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  addPhotoButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#FFD600',
+  },
   attachmentsContainer: {
     gap: 12,
   },
@@ -524,11 +708,81 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#E5E7EB',
+    position: 'relative',
   },
   attachmentImage: {
     width: isSmallScreen ? 180 : 220,
     height: isSmallScreen ? 140 : 170,
     backgroundColor: '#F3F4F6',
+  },
+  removePhotoButton: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+  },
+  noAttachmentsBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 24,
+  },
+  noAttachmentsText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    marginTop: 8,
+  },
+  photoOptionsOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  photoOptionsContainer: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    paddingBottom: 40,
+  },
+  photoOptionsTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000000',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  photoOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  photoOptionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#1A1A1A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  photoOptionText: {
+    fontSize: 16,
+    color: '#000000',
+    fontWeight: '500',
+  },
+  photoOptionCancel: {
+    marginTop: 16,
+    paddingVertical: 14,
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  photoOptionCancelText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6B7280',
   },
   modalContainer: {
     flex: 1,
