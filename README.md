@@ -3,19 +3,26 @@
 A full-stack citizen services platform built with React Native (Expo), Node.js API, and Zero real-time sync.
 
 ## Quick Start
-
+Ensure that node and npm are installed
 ```bash
 # 1. Start database
 docker compose up -d postgres
 
-# 2. Start API server (in new terminal)
-cd apps/api && npm run dev
+# 2. Run migrations to insert dummy data into postgres and Start API server (in new terminal)
+cd apps/api
+npm install
+npm run migrate
+npm run dev
 
 # 3. Start Zero cache server (in new terminal)
-cd apps/zero && npm run dev
+cd apps/zero
+npm install
+npm run dev
 
 # 4. Start frontend (in new terminal - optional)
-cd frontend && npm start
+cd frontend
+npm install
+npm run dev
 ```
 
 ## Services & Ports
