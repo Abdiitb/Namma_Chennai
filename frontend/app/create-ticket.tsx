@@ -26,6 +26,9 @@ import { useZero } from '@rocicorp/zero/react';
 import { schema } from '@/zero/schema';
 import * as ImagePicker from 'expo-image-picker';
 import { API_BASE_URL } from '@/constants/api';
+import * as Speech from 'expo-speech';
+
+const recognitionRef = useRef<any>(null);
 
 // Categories from schema
 const CATEGORIES = [
@@ -47,6 +50,7 @@ export default function CreateTicketScreen() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [classifyingImages, setClassifyingImages] = useState(false);
+    const [isListening, setIsListening] = useState(false);
     const [errors, setErrors] = useState<{
         title?: string;
         description?: string;
@@ -202,6 +206,79 @@ export default function CreateTicketScreen() {
             console.error('Error preparing image for classification:', error);
             setClassifyingImages(false);
         }
+    };
+
+
+
+
+    const handleVoiceInput = async () => {
+    try {
+        if (Platform.OS === 'web') {
+            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+            if (!SpeechRecognition) {
+                RNAlert.alert('Not Supported', 'Speech recognition is not supported on your browser');
+                return;
+            }
+
+            // TOGGLE: If we are already listening, STOP it
+            if (isListening) {
+                recognitionRef.current?.stop();
+                setIsListening(false);
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.language = 'en-US';
+
+            recognition.onstart = () => {
+                setIsListening(true);
+                console.log('Listening started...');
+            };
+
+            recognition.onresult = (event: any) => {
+                let finalTranscript = '';
+                // The API sends a list of results; we only want the finalized ones
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    }
+                }
+
+                if (finalTranscript) {
+                    setDescription(prev => {
+                        const newDesc = prev ? (prev.trim() + ' ' + finalTranscript.trim()) : finalTranscript.trim();
+                        return newDesc.slice(0, 500);
+                    });
+                }
+            };
+
+            recognition.onerror = (event: any) => {
+                console.error('Speech recognition error:', event.error);
+                setIsListening(false);
+                if (event.error !== 'no-speech') {
+                    RNAlert.alert('Error', `Speech recognition failed: ${event.error}`);
+                }
+            };
+
+            recognition.onend = () => {
+                setIsListening(false);
+                console.log('🎤 Mic turned off');
+            };
+
+            recognitionRef.current = recognition;
+            recognition.start();
+
+        } else {
+            RNAlert.alert('Coming Soon', 'Voice input for mobile requires expo-speech-recognition native modules.');
+        }
+    } catch (error) {
+        console.error('Error starting voice input:', error);
+        setIsListening(false);
+    }
     };
 
     // Remove photo
@@ -383,7 +460,29 @@ export default function CreateTicketScreen() {
 
                     {/* Description */}
                     <View style={styles.section}>
-                        <ThemedText style={styles.label}>Description *</ThemedText>
+                        <View style={styles.labelWithButton}>
+                            <ThemedText style={styles.label}>Description *</ThemedText>
+                            <Pressable 
+                                style={[
+                                    styles.voiceButton,
+                                    isListening && styles.voiceButtonActive
+                                ]}
+                                onPress={handleVoiceInput}
+                                //disabled={isListening}
+                            >
+                                <Ionicons 
+                                    name={isListening ? "stop-circle" : "mic-outline"} 
+                                    size={16} 
+                                    color={isListening ? "#fff" : "#6366F1"} 
+                                />
+                                <ThemedText style={[
+                                    styles.voiceButtonText,
+                                    isListening && styles.voiceButtonTextActive
+                                ]}>
+                                    {isListening ? 'Stop' : 'Voice'}
+                                </ThemedText>
+                            </Pressable>
+                        </View>
                         <View style={[styles.textAreaContainer, errors.description && styles.inputError]}>
                             <TextInput
                                 style={styles.textArea}
@@ -574,6 +673,35 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: '#374151',
         marginBottom: 8,
+    },
+    labelWithButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    voiceButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: '#F3F4F6',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#E5E7EB',
+    },
+    voiceButtonActive: {
+        backgroundColor: '#6366F1',
+        borderColor: '#6366F1',
+    },
+    voiceButtonText: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#6366F1',
+    },
+    voiceButtonTextActive: {
+        color: '#fff',
     },
     categoriesGrid: {
         flexDirection: 'row',
