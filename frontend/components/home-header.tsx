@@ -1,64 +1,67 @@
 import { StyleSheet, View, SafeAreaView, Pressable } from 'react-native';
 import { ThemedText } from './themed-text';
 import { Ionicons } from '@expo/vector-icons';
+import { ThemeColors } from '@/constants/theme';
 
 interface HomeHeaderProps {
     userName?: string;
+    location?: string;
     onNotificationPress?: () => void;
     onProfilePress?: () => void;
 }
 
 export function HomeHeader({
     userName = 'Citizen',
+    location = 'Marina Beach, Chennai',
     onNotificationPress,
     onProfilePress,
 }: HomeHeaderProps) {
     return (
-        <View style={styles.safeArea}>
+        <SafeAreaView style={styles.safeArea}>
             <View style={styles.container}>
+                {/* Location Section */}
                 <View style={styles.leftSection}>
-                    <ThemedText style={styles.greeting}>Hello,</ThemedText>
-                    <ThemedText style={styles.userName}>{userName}</ThemedText>
+                    <View style={styles.locationRow}>
+                        <Ionicons name="location" size={16} color="#F73812" />
+                        <ThemedText style={styles.locationText}>{location}</ThemedText>
+                    </View>
                 </View>
 
+                {/* Right Section - Notification */}
                 <View style={styles.rightSection}>
                     <Pressable style={styles.iconButton} onPress={onNotificationPress}>
-                        <Ionicons name="notifications-outline" size={24} color="#FFD600" />
-                        <View style={styles.badge} />
-                    </Pressable>
-
-                    <Pressable style={styles.logoutButton} onPress={onProfilePress}>
-                        <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+                        <Ionicons name="notifications-outline" size={22} color={ThemeColors.textBold} />
                     </Pressable>
                 </View>
             </View>
-        </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     safeArea: {
-        backgroundColor: '#000000',
+        backgroundColor: ThemeColors.white,
     },
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 16,
-        paddingVertical: 16,
-        backgroundColor: '#000000',
+        paddingVertical: 12,
+        backgroundColor: ThemeColors.white,
     },
     leftSection: {
         flex: 1,
     },
-    greeting: {
-        fontSize: 14,
-        color: '#FFFFFF',
+    locationRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
     },
-    userName: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#FFD600',
+    locationText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: ThemeColors.textBold,
     },
     rightSection: {
         flexDirection: 'row',
@@ -69,35 +72,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: '#1A1A1A',
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    badge: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#FFD600',
-    },
-    profileButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#FFD600',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    logoutButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#1A1A1A',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: '#EF4444',
     },
 });

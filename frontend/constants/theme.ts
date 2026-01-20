@@ -5,44 +5,59 @@
 
 import { Platform } from 'react-native';
 
-// Theme Colors - Black, Yellow, White
+// Theme Colors - Blue, Gray, White based on Final.svg design
 export const ThemeColors = {
-  black: '#000000',
-  yellow: '#FFD600',
+  primary: '#2174D4',
+  primaryDark: '#016ACD',
+  background: '#FAFAFA',
   white: '#FFFFFF',
-  darkGray: '#1A1A1A',
-  lightGray: '#F5F5F5',
-  gray: '#6B7280',
+  black: '#000000',
+  darkGray: '#444444',
+  textPrimary: '#656565',
+  textSecondary: '#969696',
+  textBold: '#313131',
+  border: '#ECEDEF',
+  overlay: 'rgba(150, 150, 150, 0.5)',
   error: '#EF4444',
-  success: '#22C55E',
+  success: '#599839',
+  yellow: '#FFD600',
+  gray: '#6B7280',
+  // Icon background colors
+  iconBgGreen: '#EAF5E5',
+  iconColorGreen: '#599839',
+  iconBgYellow: '#FBF0D5',
+  iconColorYellow: '#826B31',
+  iconBgBlue: '#DEF7FC',
+  iconColorBlue: '#3B8FA3',
+  iconBgGray: '#F7F7F7',
 };
 
-const tintColorLight = ThemeColors.yellow;
-const tintColorDark = ThemeColors.yellow;
+const tintColorLight = ThemeColors.primary;
+const tintColorDark = ThemeColors.primaryDark;
 
 export const Colors = {
   light: {
-    text: ThemeColors.black,
-    background: ThemeColors.white,
+    text: ThemeColors.textPrimary,
+    background: ThemeColors.background,
     tint: tintColorLight,
-    icon: ThemeColors.yellow,
-    tabIconDefault: ThemeColors.gray,
+    icon: ThemeColors.primary,
+    tabIconDefault: ThemeColors.textSecondary,
     tabIconSelected: tintColorLight,
     card: ThemeColors.white,
-    border: ThemeColors.yellow,
-    primary: ThemeColors.yellow,
-    secondary: ThemeColors.black,
+    border: ThemeColors.border,
+    primary: ThemeColors.primary,
+    secondary: ThemeColors.textPrimary,
   },
   dark: {
     text: ThemeColors.white,
-    background: ThemeColors.black,
+    background: ThemeColors.darkGray,
     tint: tintColorDark,
-    icon: ThemeColors.yellow,
-    tabIconDefault: ThemeColors.gray,
+    icon: ThemeColors.primaryDark,
+    tabIconDefault: ThemeColors.textSecondary,
     tabIconSelected: tintColorDark,
     card: ThemeColors.darkGray,
-    border: ThemeColors.yellow,
-    primary: ThemeColors.yellow,
+    border: ThemeColors.border,
+    primary: ThemeColors.primaryDark,
     secondary: ThemeColors.white,
   },
 };
@@ -74,14 +89,14 @@ export const Fonts = Platform.select({
 
 // Navigation Theme for React Navigation
 export const YellowBlackTheme = {
-  dark: true,
+  dark: false,
   colors: {
-    primary: ThemeColors.yellow,
-    background: ThemeColors.black,
-    card: ThemeColors.darkGray,
-    text: ThemeColors.white,
-    border: ThemeColors.yellow,
-    notification: ThemeColors.yellow,
+    primary: ThemeColors.primary,
+    background: ThemeColors.background,
+    card: ThemeColors.white,
+    text: ThemeColors.textPrimary,
+    border: ThemeColors.border,
+    notification: ThemeColors.primary,
   },
   fonts: {
     regular: {

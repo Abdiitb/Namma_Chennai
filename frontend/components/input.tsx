@@ -1,5 +1,6 @@
 import { StyleSheet, TextInput, View, TextInputProps } from 'react-native';
 import { ThemedText } from './themed-text';
+import { colors, borderRadius, spacing, typography } from '@/constants/styles';
 
 interface InputProps extends TextInputProps {
   label: string;
@@ -12,7 +13,7 @@ export function Input({ label, error, ...props }: InputProps) {
       <ThemedText style={styles.label}>{label}</ThemedText>
       <TextInput
         style={[styles.input, error && styles.inputError]}
-        placeholderTextColor="#999"
+        placeholderTextColor={colors.textSecondary}
         {...props}
       />
       {error && <ThemedText style={styles.errorText}>{error}</ThemedText>}
@@ -22,29 +23,30 @@ export function Input({ label, error, ...props }: InputProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeightSemiBold,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
-    color: '#000',
+    borderColor: colors.border,
+    borderRadius: borderRadius.medium,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    fontSize: typography.fontSize.md,
+    backgroundColor: colors.cardBackground,
+    color: colors.textPrimary,
   },
   inputError: {
     borderColor: '#FF3B30',
   },
   errorText: {
     color: '#FF3B30',
-    fontSize: 12,
-    marginTop: 4,
+    fontSize: typography.fontSize.xs,
+    marginTop: spacing.xs,
   },
 });

@@ -7,6 +7,7 @@ import { ThemedText } from '@/components/themed-text';
 import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
 import { SERVICES, QUICK_ACTIONS } from '@/constants/services';
+import { ThemeColors } from '@/constants/theme';
 
 export default function HomeScreen() {
   const { user, logout } = useAuth();
@@ -39,7 +40,18 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Services Grid */}
+        {/* Quick Actions Section */}
+        <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>Quick Actions</ThemedText>
+        </View>
+        
+        <QuickActions 
+          title=""
+          items={QUICK_ACTIONS}
+          onItemPress={handleQuickAction}
+        />
+
+        {/* Namma Chennai Services - 2x2 Grid */}
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Namma Chennai Services</ThemedText>
           <View style={styles.servicesGrid}>
@@ -47,6 +59,7 @@ export default function HomeScreen() {
               <View key={service.id} style={styles.serviceItem}>
                 <ServiceCard
                   title={service.title}
+                  subtitle={service.subtitle}
                   icon={service.icon}
                   iconColor={service.iconColor}
                   iconBgColor={service.iconBgColor}
@@ -57,25 +70,32 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Quick Actions */}
-        <QuickActions 
-          title="Quick Report"
-          items={QUICK_ACTIONS}
-          onItemPress={handleQuickAction}
-        />
-
-        {/* Recent Activity Section */}
+        {/* Recent News Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <ThemedText style={styles.sectionTitle}>Recent Activity</ThemedText>
+            <ThemedText style={styles.sectionTitle}>Recent news</ThemedText>
             <Pressable>
               <ThemedText style={styles.seeAll}>See All →</ThemedText>
             </Pressable>
           </View>
           
+          {/* News Card with Image */}
+          <View style={styles.newsCard}>
+            <View style={styles.newsImagePlaceholder}>
+              <Ionicons name="image-outline" size={32} color={ThemeColors.textSecondary} />
+            </View>
+            <View style={styles.newsContent}>
+              <ThemedText style={styles.newsTitle}>Removal of Garbage from Off Buckingham Canal</ThemedText>
+              <ThemedText style={styles.newsDescription} numberOfLines={2}>
+                Greater Chennai Corporation has successfully completed the garbage removal drive...
+              </ThemedText>
+            </View>
+          </View>
+
+          {/* Activity Cards */}
           <View style={styles.activityCard}>
-            <View style={styles.activityIcon}>
-              <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+            <View style={[styles.activityIcon, { backgroundColor: ThemeColors.iconBgGreen }]}>
+              <Ionicons name="checkmark-circle" size={20} color={ThemeColors.iconColorGreen} />
             </View>
             <View style={styles.activityContent}>
               <ThemedText style={styles.activityTitle}>Pothole Repair Completed</ThemedText>
@@ -85,30 +105,14 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.activityCard}>
-            <View style={styles.activityIcon}>
-              <Ionicons name="time" size={24} color="#F59E0B" />
+            <View style={[styles.activityIcon, { backgroundColor: ThemeColors.iconBgYellow }]}>
+              <Ionicons name="time" size={20} color={ThemeColors.iconColorYellow} />
             </View>
             <View style={styles.activityContent}>
               <ThemedText style={styles.activityTitle}>Street Light Issue - In Progress</ThemedText>
               <ThemedText style={styles.activitySubtitle}>T. Nagar, Chennai</ThemedText>
               <ThemedText style={styles.activityTime}>Yesterday</ThemedText>
             </View>
-          </View>
-        </View>
-
-        {/* Stats Section */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <ThemedText style={styles.statNumber}>156</ThemedText>
-            <ThemedText style={styles.statLabel}>Issues Resolved</ThemedText>
-          </View>
-          <View style={styles.statCard}>
-            <ThemedText style={styles.statNumber}>23</ThemedText>
-            <ThemedText style={styles.statLabel}>In Progress</ThemedText>
-          </View>
-          <View style={styles.statCard}>
-            <ThemedText style={styles.statNumber}>4.8</ThemedText>
-            <ThemedText style={styles.statLabel}>Avg. Rating</ThemedText>
           </View>
         </View>
       </ScrollView>
@@ -120,7 +124,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.background,
   },
   scrollView: {
     flex: 1,
@@ -139,15 +143,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
+    fontSize: 15,
+    fontWeight: '700',
+    color: ThemeColors.textBold,
     marginBottom: 16,
   },
   seeAll: {
-    fontSize: 14,
-    color: '#FFD600',
-    fontWeight: '500',
+    fontSize: 13,
+    color: ThemeColors.primary,
+    fontWeight: '600',
   },
   servicesGrid: {
     flexDirection: 'row',
@@ -155,23 +159,67 @@ const styles = StyleSheet.create({
     marginHorizontal: -6,
   },
   serviceItem: {
-    width: '33.33%',
+    width: '50%',
     padding: 6,
   },
-  activityCard: {
+  newsCard: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: ThemeColors.white,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#000000',
+    borderColor: ThemeColors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  newsImagePlaceholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    backgroundColor: ThemeColors.iconBgGray,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  newsContent: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  newsTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: ThemeColors.textBold,
+    marginBottom: 8,
+    lineHeight: 20,
+  },
+  newsDescription: {
+    fontSize: 13,
+    color: ThemeColors.textSecondary,
+    lineHeight: 18,
+  },
+  activityCard: {
+    flexDirection: 'row',
+    backgroundColor: ThemeColors.white,
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: ThemeColors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   activityIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#1A1A1A',
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: ThemeColors.iconBgGreen,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -180,42 +228,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   activityTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000000',
+    fontSize: 13,
+    fontWeight: '700',
+    color: ThemeColors.textBold,
     marginBottom: 2,
   },
   activitySubtitle: {
     fontSize: 13,
-    color: '#6B7280',
+    fontWeight: '500',
+    color: ThemeColors.textPrimary,
     marginBottom: 4,
   },
   activityTime: {
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginTop: 24,
-    gap: 12,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#000000',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFD600',
-    marginBottom: 4,
-  },
-  statLabel: {
     fontSize: 11,
-    color: '#FFFFFF',
-    textAlign: 'center',
+    color: ThemeColors.textSecondary,
   },
 });

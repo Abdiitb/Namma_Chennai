@@ -1,6 +1,7 @@
 import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
 import { ThemedText } from './themed-text';
 import { Ionicons } from '@expo/vector-icons';
+import { ThemeColors } from '@/constants/theme';
 
 interface QuickActionItem {
   id: string;
@@ -11,7 +12,7 @@ interface QuickActionItem {
 }
 
 interface QuickActionsProps {
-  title: string;
+  title?: string;
   items: QuickActionItem[];
   onItemPress?: (id: string) => void;
 }
@@ -19,22 +20,37 @@ interface QuickActionsProps {
 export function QuickActions({ title, items, onItemPress }: QuickActionsProps) {
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.sectionTitle}>{title}</ThemedText>
+      {title ? <ThemedText style={styles.sectionTitle}>{title}</ThemedText> : null}
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {items.map((item) => (
+        {items.map((item, index) => (
           <Pressable 
             key={item.id}
-            style={styles.item}
+            style={[
+              styles.pill, 
+              index === 0 && styles.pillActive
+            ]}
             onPress={() => onItemPress?.(item.id)}
           >
-            <View style={[styles.iconCircle, { backgroundColor: item.bgColor || '#1A1A1A' }]}>
-              <Ionicons name={item.icon} size={24} color={item.iconColor || '#FFD600'} />
+            <View style={[
+              styles.iconCircle, 
+              { backgroundColor: index === 0 ? ThemeColors.white : item.bgColor || ThemeColors.iconBgGray }
+            ]}>
+              <Ionicons 
+                name={item.icon} 
+                size={16} 
+                color={item.iconColor || ThemeColors.textPrimary} 
+              />
             </View>
-            <ThemedText style={styles.itemTitle} numberOfLines={2}>{item.title}</ThemedText>
+            <ThemedText style={[
+              styles.pillText,
+              index === 0 && styles.pillTextActive
+            ]}>
+              {item.title}
+            </ThemedText>
           </Pressable>
         ))}
       </ScrollView>
@@ -44,35 +60,47 @@ export function QuickActions({ title, items, onItemPress }: QuickActionsProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 24,
+    marginTop: 8,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
+    fontSize: 15,
+    fontWeight: '700',
+    color: ThemeColors.textBold,
     marginBottom: 16,
     paddingHorizontal: 16,
   },
   scrollContent: {
     paddingHorizontal: 16,
-    gap: 16,
+    gap: 10,
   },
-  item: {
+  pill: {
+    flexDirection: 'row',
     alignItems: 'center',
-    width: 80,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: ThemeColors.white,
+    borderWidth: 1,
+    borderColor: ThemeColors.border,
+    gap: 8,
+  },
+  pillActive: {
+    backgroundColor: ThemeColors.textBold,
+    borderColor: ThemeColors.textBold,
   },
   iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8,
   },
-  itemTitle: {
+  pillText: {
     fontSize: 12,
-    color: '#000000',
-    textAlign: 'center',
-    lineHeight: 16,
+    fontWeight: '600',
+    color: ThemeColors.textBold,
+  },
+  pillTextActive: {
+    color: ThemeColors.white,
   },
 });
