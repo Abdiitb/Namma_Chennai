@@ -95,11 +95,12 @@ export async function registerUser(email: string, password: string, name: string
   // Hash password
   const passwordHash = await hashPassword(password);
   const userId = require('uuid').v4();
+  const createdAt = Date.now();
 
   // Insert new user
   const result = await query(
-    'INSERT INTO users (id, email, name, password_hash, role, created_at) VALUES ($1, $2, $3, $4, $5, NOW()) RETURNING id, email, name, role',
-    [userId, email, name, passwordHash, role]
+    'INSERT INTO users (id, email, name, password_hash, role, created_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, name, role',
+    [userId, email, name, passwordHash, role, createdAt]
   );
 
   const user = result.rows[0];

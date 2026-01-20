@@ -9,6 +9,7 @@ import {
     TextInput,
     Image,
     Alert as RNAlert,
+    ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,6 +25,7 @@ import { mutators } from '@/zero/mutators';
 import { useZero } from '@rocicorp/zero/react';
 import { schema } from '@/zero/schema';
 import * as ImagePicker from 'expo-image-picker';
+import { API_BASE_URL } from '@/constants/api';
 
 // Categories from schema
 const CATEGORIES = [
@@ -44,6 +46,7 @@ export default function CreateTicketScreen() {
     const [photos, setPhotos] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [classifyingImages, setClassifyingImages] = useState(false);
     const [errors, setErrors] = useState<{
         title?: string;
         description?: string;
@@ -95,7 +98,10 @@ export default function CreateTicketScreen() {
             });
 
             if (!result.canceled && result.assets[0]) {
-                setPhotos([...photos, result.assets[0].uri]);
+                const newPhotos = [...photos, result.assets[0].uri];
+                setPhotos(newPhotos);
+                // Classify the newly taken image
+                classifyFirstImage(newPhotos);
             }
         } catch (error) {
             console.error('Error taking photo:', error);
@@ -119,11 +125,82 @@ export default function CreateTicketScreen() {
 
             if (!result.canceled && result.assets.length > 0) {
                 const newPhotos = result.assets.map(asset => asset.uri);
-                setPhotos([...photos, ...newPhotos].slice(0, 5)); // Ensure max 5 photos
+                const updatedPhotos = [...photos, ...newPhotos].slice(0, 5);
+                setPhotos(updatedPhotos);
+                
+                // Classify the first newly added image
+                if (updatedPhotos.length > 0) {
+                    classifyFirstImage(updatedPhotos);
+                }
             }
         } catch (error) {
             console.error('Error selecting photos:', error);
             RNAlert.alert('Error', 'Failed to select photos. Please try again.');
+        }
+    };
+
+    // Classify image using AI endpoint
+    const classifyFirstImage = async (photoUris: string[]) => {
+        if (photoUris.length === 0 || photos.length > 1) return;
+
+        setClassifyingImages(true);
+        try {
+            const imageUri = photoUris[0]; // Classify the first image
+
+            // Convert image URI to base64
+            const response = await fetch(imageUri);
+            const blob = await response.blob();
+            const reader = new FileReader();
+
+            reader.onload = async () => {
+                const base64String = reader.result as string;
+
+                try {
+                    // Send to classification endpoint
+                    const classifyResponse = await fetch(`${API_BASE_URL}/api/ai/classify-image`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            image: base64String,
+                        }),
+                    });
+
+                    if (classifyResponse.ok) {
+                        const result = await classifyResponse.json();
+                        console.log('Classification result:', result);
+                        if (result.category) {
+                            setCategory(result.category);
+                            RNAlert.alert(
+                                'Category Detected',
+                                `Image classified as: ${result.category}`,
+                                [{ text: 'OK' }]
+                            );
+                        }
+
+                        if (result.title && !title) {
+                            setTitle(result.title);
+                        }
+                        if (result.description && !description) {
+                            setDescription(result.description);
+                        }
+
+                    } else {
+                        console.warn('Classification failed:', classifyResponse.statusText);
+                    }
+                } catch (err) {
+                    console.warn('Error classifying image:', err);
+                    // Don't show error to user - classification is optional
+                } finally {
+                    setClassifyingImages(false);
+                }
+            };
+
+            reader.readAsDataURL(blob);
+        } catch (error) {
+            console.error('Error preparing image for classification:', error);
+            setClassifyingImages(false);
         }
     };
 
@@ -150,6 +227,7 @@ export default function CreateTicketScreen() {
             // TODO: Upload photos to your storage service (e.g., AWS S3, Firebase Storage)
             // and get URLs. For now, using local URIs as placeholder
             const attachmentUrls = photos; // Replace with actual uploaded URLs
+            console.log('Attachment URLs:', attachmentUrls);
 
             const ticketData = {
                 id: `TKT-${Date.now()}`,
@@ -344,6 +422,14 @@ export default function CreateTicketScreen() {
                     <View style={styles.section}>
                         <ThemedText style={styles.label}>
                             Add Photos (Optional) {photos.length > 0 && `(${photos.length}/5)`}
+                            {classifyingImages && (
+                                <View style={{ marginLeft: 8, flexDirection: 'row', alignItems: 'center' }}>
+                                    <ActivityIndicator size="small" color="#6366F1" />
+                                    <ThemedText style={{ fontSize: 12, color: '#6366F1', marginLeft: 4 }}>
+                                        Analyzing image...
+                                    </ThemedText>
+                                </View>
+                            )}
                         </ThemedText>
                         
                         {/* Photo Preview Grid */}
@@ -367,15 +453,23 @@ export default function CreateTicketScreen() {
                         {photos.length < 5 && (
                             <View style={styles.photoUploadContainer}>
                                 <Pressable 
-                                    style={styles.photoUploadButton}
+                                    style={[
+                                        styles.photoUploadButton,
+                                        classifyingImages && { opacity: 0.6 }
+                                    ]}
                                     onPress={handleTakePhoto}
+                                    disabled={classifyingImages}
                                 >
                                     <Ionicons name="camera-outline" size={28} color="#6366F1" />
                                     <ThemedText style={styles.photoUploadText}>Take Photo</ThemedText>
                                 </Pressable>
                                 <Pressable 
-                                    style={styles.photoUploadButton}
+                                    style={[
+                                        styles.photoUploadButton,
+                                        classifyingImages && { opacity: 0.6 }
+                                    ]}
                                     onPress={handleSelectFromGallery}
+                                    disabled={classifyingImages}
                                 >
                                     <Ionicons name="images-outline" size={28} color="#6366F1" />
                                     <ThemedText style={styles.photoUploadText}>Gallery</ThemedText>

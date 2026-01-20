@@ -21,13 +21,10 @@ const litellm = new OpenAI({
   baseURL: "https://grid.ai.juspay.net/v1", // Note: adding /v1 is standard for OpenAI-compatible proxies
 });
 const categories = [
-    "pothole",
+    "water",
+    "electricity",
     "garbage",
-    "broken_street_light",
-    "water_leakage",
-    "illegal_parking",
-    "vandalism",
-    "others"
+    "other"
   ];
 
 
@@ -207,14 +204,19 @@ app.post('/api/ai/classify-image', async (req, res) => {
     }
 
     const prompt = `
-      Analyze this image and classify it into exactly one of the following categories:
-      ${categories.join(', ')}.
+      Act as a civic issue reporter. Analyze the provided image and generate a structured report.
       
-      Respond with ONLY the name of the category. If it doesn't fit any, respond "unclassified".
-    `;
+      Available Categories: ${categories.join(', ')}.
 
+      Return ONLY a JSON object with the following fields:
+      - "category": The most appropriate category from the list above.
+      - "title": A concise, professional title for the issue (max 10 words).
+      - "description": A detailed, objective description of what is seen in the image, explaining the civic problem clearly.
+
+      If the image is not a civic issue, set category to "others", title to "Unidentified Issue", and description to "The image does not appear to show a clear civic problem."
+    `;
     const response = await litellm.chat.completions.create({
-      model: "gemini-3-pro-preview", 
+      model: "gemini-3-pro-preview",
       messages: [
         {
           role: "user",
@@ -223,20 +225,24 @@ app.post('/api/ai/classify-image', async (req, res) => {
             {
               type: "image_url",
               image_url: {
-                // Ensure image is a data URI: data:image/jpeg;base64,...
-                url: image.startsWith('http') ? image : (image.startsWith('data:') ? image : `data:image/jpeg;base64,${image}`),              },
+                url: image.startsWith('http') ? image : (image.startsWith('data:') ? image : `data:image/jpeg;base64,${image}`),
+              },
             },
           ],
         },
       ],
-      reasoning_effort: "medium", 
+      response_format: { type: "json_object" } 
     });
 
-    const identifiedCategory = response.choices[0].message.content?.trim().toLowerCase();
+    // Extract the JSON string from the response
+    const content = response.choices[0].message.content || "{}";
+    const result = JSON.parse(content);
 
     res.json({
-      category: identifiedCategory,
-      confidence: "high", 
+      category: result.category || "others",
+      title: result.title || "New Civic Issue",
+      description: result.description || "No description provided.",
+      confidence: "high"
     });
 
   } catch (error) {
