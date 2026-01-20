@@ -210,76 +210,76 @@ export default function CreateTicketScreen() {
 
 
 
+    // 1. Add this ref inside your component (near recognitionRef)
+    const descriptionAtStart = useRef('');
 
     const handleVoiceInput = async () => {
-    try {
-        if (Platform.OS === 'web') {
-            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        try {
+            if (Platform.OS === 'web') {
+                const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-            if (!SpeechRecognition) {
-                RNAlert.alert('Not Supported', 'Speech recognition is not supported on your browser');
-                return;
-            }
+                if (!SpeechRecognition) {
+                    RNAlert.alert('Not Supported', 'Speech recognition is not supported on your browser');
+                    return;
+                }
 
-            // TOGGLE: If we are already listening, STOP it
-            if (isListening) {
-                recognitionRef.current?.stop();
-                setIsListening(false);
-                return;
-            }
+                if (isListening) {
+                    recognitionRef.current?.stop();
+                    setIsListening(false);
+                    return;
+                }
 
-            const recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.language = 'en-US';
+                // 2. Capture the current text as the "anchor" before starting
+                descriptionAtStart.current = description;
 
-            recognition.onstart = () => {
-                setIsListening(true);
-                console.log('Listening started...');
-            };
+                const recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'en-US';
 
-            recognition.onresult = (event: any) => {
-                let finalTranscript = '';
-                // The API sends a list of results; we only want the finalized ones
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const transcript = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        finalTranscript += transcript;
+                recognition.onstart = () => {
+                    setIsListening(true);
+                };
+
+                recognition.onresult = (event: any) => {
+                    let sessionTranscript = '';
+
+                    // 3. Always loop through all results in the current session
+                    for (let i = 0; i < event.results.length; i++) {
+                        sessionTranscript += event.results[i][0].transcript;
                     }
-                }
 
-                if (finalTranscript) {
-                    setDescription(prev => {
-                        const newDesc = prev ? (prev.trim() + ' ' + finalTranscript.trim()) : finalTranscript.trim();
-                        return newDesc.slice(0, 500);
-                    });
-                }
-            };
+                    // 4. Update UI: Anchor Text + EVERYTHING said in this session
+                    const combinedText = descriptionAtStart.current 
+                        ? `${descriptionAtStart.current.trim()} ${sessionTranscript.trim()}`
+                        : sessionTranscript.trim();
 
-            recognition.onerror = (event: any) => {
-                console.error('Speech recognition error:', event.error);
-                setIsListening(false);
-                if (event.error !== 'no-speech') {
-                    RNAlert.alert('Error', `Speech recognition failed: ${event.error}`);
-                }
-            };
+                    setDescription(combinedText.slice(0, 500));
+                };
 
-            recognition.onend = () => {
-                setIsListening(false);
-                console.log('🎤 Mic turned off');
-            };
+                recognition.onerror = (event: any) => {
+                    console.error('Speech recognition error:', event.error);
+                    setIsListening(false);
+                };
 
-            recognitionRef.current = recognition;
-            recognition.start();
+                recognition.onend = () => {
+                    setIsListening(false);
+                    recognitionRef.current = null;
+                };
 
-        } else {
-            RNAlert.alert('Coming Soon', 'Voice input for mobile requires expo-speech-recognition native modules.');
+                recognitionRef.current = recognition;
+                recognition.start();
+
+            } else {
+                RNAlert.alert('Coming Soon', 'Voice input for mobile coming soon');
+            }
+        } catch (error) {
+            console.error('Error starting voice input:', error);
+            setIsListening(false);
         }
-    } catch (error) {
-        console.error('Error starting voice input:', error);
-        setIsListening(false);
-    }
     };
+
+ 
 
     // Remove photo
     const handleRemovePhoto = (index: number) => {
