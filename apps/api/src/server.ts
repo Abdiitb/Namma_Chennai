@@ -14,6 +14,23 @@ import {mustGetMutator} from '@rocicorp/zero'
 import { mutators } from './mutators';
 
 
+import { OpenAI } from 'openai';
+// Initialize LiteLLM client with the provided Grid details
+const litellm = new OpenAI({
+  apiKey: process.env.GRID_API_KEY || "",
+  baseURL: "https://grid.ai.juspay.net/v1", // Note: adding /v1 is standard for OpenAI-compatible proxies
+});
+const categories = [
+    "pothole",
+    "garbage",
+    "broken_street_light",
+    "water_leakage",
+    "illegal_parking",
+    "vandalism",
+    "others"
+  ];
+
+
 dotenv.config();
 
 const app = express();
@@ -179,6 +196,55 @@ app.get('/api/zero/available-queries', (req, res) => {
     ]
   });
 });
+
+
+app.post('/api/ai/classify-image', async (req, res) => {
+  try {
+    const { image } = req.body;
+
+    if (!image || !Array.isArray(categories)) {
+      return res.status(400).json({ error: 'Image (base64) and categories array are required' });
+    }
+
+    const prompt = `
+      Analyze this image and classify it into exactly one of the following categories:
+      ${categories.join(', ')}.
+      
+      Respond with ONLY the name of the category. If it doesn't fit any, respond "unclassified".
+    `;
+
+    const response = await litellm.chat.completions.create({
+      model: "gemini-3-pro-preview", 
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            {
+              type: "image_url",
+              image_url: {
+                // Ensure image is a data URI: data:image/jpeg;base64,...
+                url: image.startsWith('http') ? image : (image.startsWith('data:') ? image : `data:image/jpeg;base64,${image}`),              },
+            },
+          ],
+        },
+      ],
+      reasoning_effort: "medium", 
+    });
+
+    const identifiedCategory = response.choices[0].message.content?.trim().toLowerCase();
+
+    res.json({
+      category: identifiedCategory,
+      confidence: "high", 
+    });
+
+  } catch (error) {
+    console.error('AI Classification error:', error);
+    res.status(500).json({ error: 'Failed to process image with AI' });
+  }
+});
+
 
 app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`API server running on port ${PORT}`);
