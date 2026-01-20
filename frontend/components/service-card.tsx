@@ -1,9 +1,11 @@
 import { StyleSheet, View, Pressable } from 'react-native';
 import { ThemedText } from './themed-text';
 import { Ionicons } from '@expo/vector-icons';
+import { ThemeColors } from '@/constants/theme';
 
 interface ServiceCardProps {
   title: string;
+  subtitle?: string;
   icon: keyof typeof Ionicons.glyphMap;
   iconColor?: string;
   iconBgColor?: string;
@@ -12,53 +14,68 @@ interface ServiceCardProps {
 
 export function ServiceCard({
   title,
+  subtitle,
   icon,
-  iconColor = '#FFD600',
-  iconBgColor = '#1A1A1A',
+  iconColor = ThemeColors.textPrimary,
+  iconBgColor = ThemeColors.iconBgGray,
   onPress
 }: ServiceCardProps) {
   return (
     <Pressable 
       style={styles.card}
       onPress={onPress}
-      android_ripple={{ color: '#E5E7EB' }}
+      android_ripple={{ color: ThemeColors.border }}
     >
       <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
-        <Ionicons name={icon} size={28} color={iconColor} />
+        <Ionicons name={icon} size={20} color={iconColor} />
       </View>
-      <ThemedText style={styles.title} numberOfLines={2}>{title}</ThemedText>
+      <View style={styles.textContainer}>
+        <ThemedText style={styles.title}>{title}</ThemedText>
+        {subtitle && <ThemedText style={styles.subtitle}>{subtitle}</ThemedText>}
+      </View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: ThemeColors.white,
+    borderRadius: 20,
     padding: 16,
     alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    minHeight: 110,
+    justifyContent: 'flex-start',
+    minHeight: 130,
     borderWidth: 1,
-    borderColor: '#000000',
+    borderColor: ThemeColors.border,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+    flex: 1,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
+    width: 40,
+    height: 40,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  textContainer: {
+    flex: 1,
   },
   title: {
     fontSize: 13,
-    fontWeight: '500',
-    color: '#000000',
+    fontWeight: '700',
+    color: ThemeColors.textBold,
     lineHeight: 18,
+  },
+  subtitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: ThemeColors.textBold,
+    lineHeight: 18,
+    marginTop: 2,
   },
 });

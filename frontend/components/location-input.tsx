@@ -37,7 +37,7 @@ export function LocationInput({
     const [isLoading, setIsLoading] = useState(false);
     const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
-    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         setQuery(value);

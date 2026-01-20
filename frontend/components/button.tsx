@@ -1,5 +1,6 @@
 import { StyleSheet, Pressable, ActivityIndicator } from 'react-native';
 import { ThemedText } from './themed-text';
+import { colors, borderRadius, spacing, typography } from '@/constants/styles';
 
 interface ButtonProps {
   title: string;
@@ -35,7 +36,7 @@ export function Button({
       disabled={disabled || loading}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'secondary' ? '#007AFF' : '#fff'} />
+        <ActivityIndicator color={variant === 'secondary' ? colors.primary : colors.white} />
       ) : (
         <ThemedText style={textStyle}>{title}</ThemedText>
       )}
@@ -45,17 +46,17 @@ export function Button({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    borderRadius: borderRadius.medium,
     alignItems: 'center',
     justifyContent: 'center',
   },
   buttonSecondary: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: colors.primary,
   },
   buttonDanger: {
     backgroundColor: '#FF3B30',
@@ -64,11 +65,11 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: colors.white,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeightSemiBold,
   },
   buttonTextSecondary: {
-    color: '#007AFF',
+    color: colors.primary,
   },
 });
