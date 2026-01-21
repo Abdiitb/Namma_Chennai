@@ -21,10 +21,10 @@ const litellm = new OpenAI({
   baseURL: "https://grid.ai.juspay.net/v1", // Note: adding /v1 is standard for OpenAI-compatible proxies
 });
 const categories = [
-    "water",
-    "electricity",
-    "garbage",
-    "other"
+    "water issue",
+    "electricity issue",
+    "garbage issue",
+    "other issues"
   ];
 
 

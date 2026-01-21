@@ -33,8 +33,11 @@ interface ZeroProviderProps {
   children: ReactNode;
 }
 
-const API_BASE_URL = 'http://localhost:3000'; // Updated for mobile device testing
-const ZERO_SERVER_URL = 'http://localhost:4848'; // Updated for mobile device testing
+const API_BASE_URL = 'http://10.5.36.7:3000'; // Updated for mobile device testing
+const ZERO_SERVER_URL = 'http://10.5.36.24:4848'; // Updated for mobile device testing
+
+console.log('API_BASE_URL set to:', API_BASE_URL);
+console.log('ZERO_SERVER_URL set to:', ZERO_SERVER_URL);
 
 export function ZeroProvider({ children }: ZeroProviderProps) {
   const [zero, setZero] = useState<ZeroInstance | null>(null);

@@ -6,6 +6,7 @@ import { Platform } from "react-native";
 let DiscoverScreen: any;
 
 if (Platform.OS === "web") {
+  console.log("Loading web version of DiscoverScreen", Platform.OS);
    DiscoverScreen = require("./discover.web").default;
 } 
 else {

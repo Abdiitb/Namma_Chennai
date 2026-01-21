@@ -111,6 +111,17 @@ export default function TabLayout() {
           href: null, // This hides it from the tab bar
         }}
       />
+
+      {/* Discover Tab */}
+      <Tabs.Screen
+        name="discover"
+        options={{
+          title: 'Discover',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'map' : 'map-outline'} size={24} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

@@ -26,6 +26,8 @@ export default function RootLayout() {
   );
 }
 
+console.log('Zero Server URL:', 'http://10.5.36.24:4848');
+
 function InnerRootLayout() {
   const { user } = useAuth();
   return (
@@ -35,7 +37,7 @@ function InnerRootLayout() {
         mutators={mutators}
         userID={user ? user.id : 'anon'}
         auth={user?.token ?? ''}
-        server={Platform.OS === 'web' ? 'http://localhost:4848' : 'http://10.64.83.0:4848'}
+        server='http://10.5.36.24:4848'
         kvStore={Platform.OS !== 'web' ? expoSQLiteStoreProvider() : 'idb'}
       >
         <ThemeProvider value={YellowBlackTheme}>

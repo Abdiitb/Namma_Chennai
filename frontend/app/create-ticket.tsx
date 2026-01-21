@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
     StyleSheet,
     View,
@@ -11,6 +11,13 @@ import {
     Alert as RNAlert,
     ActivityIndicator,
 } from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as ImageManipulator from 'expo-image-manipulator';
+import {
+    ExpoSpeechRecognitionModule,
+    useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
+
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
@@ -20,15 +27,11 @@ import { LocationInput } from '@/components/location-input';
 import { Alert } from '@/components/alert';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/auth-context';
-import { Icon } from 'react-native-screens';
 import { mutators } from '@/zero/mutators';
 import { useZero } from '@rocicorp/zero/react';
 import { schema } from '@/zero/schema';
 import * as ImagePicker from 'expo-image-picker';
 import { API_BASE_URL } from '@/constants/api';
-import * as Speech from 'expo-speech';
-
-const recognitionRef = useRef<any>(null);
 
 // Categories from schema
 const CATEGORIES = [
@@ -59,6 +62,40 @@ export default function CreateTicketScreen() {
     }>({});
     const [showSuccess, setShowSuccess] = useState(false);
     const zero = useZero();
+    const descriptionAtStart = useRef('');
+    const recognitionRef = useRef<any>(null);
+
+    // Setup speech recognition events using hooks
+    useSpeechRecognitionEvent('start', () => {
+        console.log('Speech recognition started');
+        setIsListening(true);
+    });
+
+    useSpeechRecognitionEvent('end', () => {
+        console.log('Speech recognition ended');
+        setIsListening(false);
+    });
+
+    useSpeechRecognitionEvent('result', (event) => {
+        console.log('Speech result:', event);
+        if (event.results && event.results.length > 0) {
+            const transcript = event.results[0]?.transcript || '';
+            if (transcript) {
+                const combinedText = descriptionAtStart.current
+                    ? `${descriptionAtStart.current.trim()} ${transcript.trim()}`
+                    : transcript.trim();
+
+                setDescription(combinedText.slice(0, 500));
+                console.log('Transcribed text:', combinedText);
+            }
+        }
+    });
+
+    useSpeechRecognitionEvent('error', (event) => {
+        console.error('Speech recognition error:', event.error, event.message);
+        setIsListening(false);
+        RNAlert.alert('Error', `Speech recognition failed: ${event.message}`);
+    });
 
     // Request camera permissions
     const requestCameraPermission = async () => {
@@ -104,7 +141,6 @@ export default function CreateTicketScreen() {
             if (!result.canceled && result.assets[0]) {
                 const newPhotos = [...photos, result.assets[0].uri];
                 setPhotos(newPhotos);
-                // Classify the newly taken image
                 classifyFirstImage(newPhotos);
             }
         } catch (error) {
@@ -122,7 +158,7 @@ export default function CreateTicketScreen() {
             const result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.Images,
                 allowsMultipleSelection: true,
-                selectionLimit: 5 - photos.length, // Max 5 photos total
+                selectionLimit: 5 - photos.length,
                 aspect: [4, 3],
                 quality: 0.8,
             });
@@ -132,7 +168,6 @@ export default function CreateTicketScreen() {
                 const updatedPhotos = [...photos, ...newPhotos].slice(0, 5);
                 setPhotos(updatedPhotos);
                 
-                // Classify the first newly added image
                 if (updatedPhotos.length > 0) {
                     classifyFirstImage(updatedPhotos);
                 }
@@ -160,46 +195,46 @@ export default function CreateTicketScreen() {
                 const base64String = reader.result as string;
 
                 try {
-                    // Send to classification endpoint
-                    const classifyResponse = await fetch(`${API_BASE_URL}/api/ai/classify-image`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
+            // Send to classification endpoint
+            const classifyResponse = await fetch(`${API_BASE_URL}/api/ai/classify-image`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
                             image: base64String,
-                        }),
-                    });
+                }),
+            });
 
-                    if (classifyResponse.ok) {
-                        const result = await classifyResponse.json();
-                        console.log('Classification result:', result);
-                        if (result.category) {
-                            setCategory(result.category);
-                            RNAlert.alert(
-                                'Category Detected',
-                                `Image classified as: ${result.category}`,
-                                [{ text: 'OK' }]
-                            );
-                        }
-
-                        if (result.title && !title) {
-                            setTitle(result.title);
-                        }
-                        if (result.description && !description) {
-                            setDescription(result.description);
-                        }
-
-                    } else {
-                        console.warn('Classification failed:', classifyResponse.statusText);
-                    }
-                } catch (err) {
-                    console.warn('Error classifying image:', err);
-                    // Don't show error to user - classification is optional
-                } finally {
-                    setClassifyingImages(false);
+            if (classifyResponse.ok) {
+                const result = await classifyResponse.json();
+                console.log('Classification result:', result);
+                if (result.category) {
+                    setCategory(result.category);
+                    RNAlert.alert(
+                        'Category Detected',
+                        `Image classified as: ${result.category}`,
+                        [{ text: 'OK' }]
+                    );
                 }
-            };
+
+                if (result.title && !title) {
+                    setTitle(result.title);
+                }
+                if (result.description && !description) {
+                    setDescription(result.description);
+                }
+
+            } else {
+                        console.warn('Classification failed:', classifyResponse.statusText);
+            }
+        } catch (err) {
+            console.warn('Error classifying image:', err);
+                    // Don't show error to user - classification is optional
+        } finally {
+            setClassifyingImages(false);
+        }
+    };
 
             reader.readAsDataURL(blob);
         } catch (error) {
@@ -210,12 +245,12 @@ export default function CreateTicketScreen() {
 
 
 
-    // 1. Add this ref inside your component (near recognitionRef)
-    const descriptionAtStart = useRef('');
+
 
     const handleVoiceInput = async () => {
         try {
             if (Platform.OS === 'web') {
+                // Web implementation using Web Speech API
                 const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
                 if (!SpeechRecognition) {
@@ -224,35 +259,35 @@ export default function CreateTicketScreen() {
                 }
 
                 if (isListening) {
-                    recognitionRef.current?.stop();
+                    const recognition = (window as any).currentRecognition;
+                    recognition?.stop();
                     setIsListening(false);
                     return;
                 }
 
-                // 2. Capture the current text as the "anchor" before starting
                 descriptionAtStart.current = description;
+                setIsListening(true);
 
                 const recognition = new SpeechRecognition();
+                (window as any).currentRecognition = recognition;
+
                 recognition.continuous = true;
                 recognition.interimResults = true;
                 recognition.lang = 'en-US';
 
                 recognition.onstart = () => {
-                    setIsListening(true);
+                    console.log('Speech recognition started');
                 };
 
                 recognition.onresult = (event: any) => {
-                    let sessionTranscript = '';
-
-                    // 3. Always loop through all results in the current session
-                    for (let i = 0; i < event.results.length; i++) {
-                        sessionTranscript += event.results[i][0].transcript;
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
                     }
 
-                    // 4. Update UI: Anchor Text + EVERYTHING said in this session
-                    const combinedText = descriptionAtStart.current 
-                        ? `${descriptionAtStart.current.trim()} ${sessionTranscript.trim()}`
-                        : sessionTranscript.trim();
+                    const combinedText = descriptionAtStart.current
+                        ? `${descriptionAtStart.current.trim()} ${transcript.trim()}`
+                        : transcript.trim();
 
                     setDescription(combinedText.slice(0, 500));
                 };
@@ -264,22 +299,57 @@ export default function CreateTicketScreen() {
 
                 recognition.onend = () => {
                     setIsListening(false);
-                    recognitionRef.current = null;
                 };
 
-                recognitionRef.current = recognition;
                 recognition.start();
-
             } else {
-                RNAlert.alert('Coming Soon', 'Voice input for mobile coming soon');
+                // Mobile implementation using ExpoSpeechRecognitionModule
+                if (isListening) {
+                    try {
+                        await ExpoSpeechRecognitionModule.stop();
+                        setIsListening(false);
+                    } catch (error) {
+                        console.error('Error stopping speech:', error);
+                        setIsListening(false);
+                    }
+                    return;
+                }
+
+                descriptionAtStart.current = description;
+
+                try {
+                    // Request permissions first
+                    const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+                    
+                    if (!result.granted) {
+                        RNAlert.alert(
+                            'Permission Required',
+                            'Microphone permission is required for voice input',
+                            [{ text: 'OK' }]
+                        );
+                        return;
+                    }
+
+                    // Start speech recognition
+                    await ExpoSpeechRecognitionModule.start({
+                        lang: 'en-US',
+                        interimResults: true,
+                        continuous: false,
+                    });
+                } catch (error) {
+                    console.error('Error starting speech recognition:', error);
+                    setIsListening(false);
+                    
+                    if (error instanceof Error) {
+                        RNAlert.alert('Error', error.message || 'Failed to start speech recognition');
+                    }
+                }
             }
         } catch (error) {
-            console.error('Error starting voice input:', error);
+            console.error('Error in handleVoiceInput:', error);
             setIsListening(false);
         }
     };
-
- 
 
     // Remove photo
     const handleRemovePhoto = (index: number) => {
@@ -301,10 +371,7 @@ export default function CreateTicketScreen() {
         setLoading(true);
         setError('');
         try {
-            // TODO: Upload photos to your storage service (e.g., AWS S3, Firebase Storage)
-            // and get URLs. For now, using local URIs as placeholder
-            const attachmentUrls = photos; // Replace with actual uploaded URLs
-            console.log('Attachment URLs:', attachmentUrls);
+            const attachmentUrls = photos;
 
             const ticketData = {
                 id: `TKT-${Date.now()}`,
@@ -405,7 +472,7 @@ export default function CreateTicketScreen() {
                     )}
 
                     {/* Category Selection */}
-                    <View style={styles.section}>
+                    {/* <View style={styles.section}>
                         <ThemedText style={styles.sectionTitle}>Select Category *</ThemedText>
                         {errors.category && (
                             <ThemedText style={styles.errorText}>{errors.category}</ThemedText>
@@ -444,6 +511,13 @@ export default function CreateTicketScreen() {
                                 </Pressable>
                             ))}
                         </View>
+                    </View> */}
+
+                    {/* Category Header */}
+                    <View style={styles.categoryHeader}>
+                    <ThemedText style={styles.categoryTitle}>
+                        {category ? CATEGORIES.find(c => c.id === category)?.label : 'Select Category'}
+                    </ThemedText>
                     </View>
 
                     {/* Title */}
