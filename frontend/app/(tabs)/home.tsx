@@ -7,8 +7,8 @@ import { useAuth } from '@/context/auth-context';
 import { useLanguage } from '@/context/language-context';
 
 const QUICK_ACTIONS = [
-  { id: '1', title: 'Raise a\nComplaint', icon: 'alert-circle-outline' as const, color: '#EC4899' },
-  { id: '2', title: 'Pay\nTax dues', icon: 'card-outline' as const, color: '#F59E0B' },
+  { id: '1', title: 'Raise a\nComplaint', icon: 'ticket-outline' as const, color: '#EC4899' },
+  { id: '2', title: 'Pay\nTax dues', icon: 'cash-outline' as const, color: '#F59E0B' },
   { id: '3', title: 'Get\nDocuments', icon: 'document-outline' as const, color: '#06B6D4' },
   { id: '4', title: 'More\nServices', icon: 'apps-outline' as const, color: '#8B5CF6' },
 ];
@@ -17,15 +17,15 @@ const EVENTS = [
   {
     id: '1',
     title: 'Cleaning Chennai',
-    location: 'Besant Nagar, 500m away',
-    image: 'https://via.placeholder.com/200x150/FFB347/FFFFFF?text=Cleaning+Event',
+    location: 'Besant Nagar | 500m away',
+    image: require('@/assets/images/0cb5d24ab67a80376c347300d7a28648e883199f.png'),
     isLive: true,
   },
   {
     id: '2',
     title: 'Chennai Marathon',
-    location: 'Marina Beach, 2km away',
-    image: 'https://via.placeholder.com/200x150/FF6B6B/FFFFFF?text=Marathon',
+    location: 'Marina Beach | 2km away',
+    image: require('@/assets/images/ab6d991c841b95c1ea7bbde309cf192c7a4a99f8.png'),
     isLive: false,
   },
 ];
@@ -33,13 +33,13 @@ const EVENTS = [
 const PLACES = [
   {
     id: '1',
-    title: 'Kapaleeshwarar Temple',
-    image: 'https://via.placeholder.com/200x150/D4A5A5/FFFFFF?text=Temple',
+    title: 'Victoria Public Hall',
+    image: require('@/assets/images/e106eefd9b743fb246e8a5b539e805c405bd7e60.png'),
   },
   {
     id: '2',
-    title: 'Marina Beach',
-    image: 'https://via.placeholder.com/200x150/A8D5BA/FFFFFF?text=Beach',
+    title: 'Rippon Building',
+    image: require('@/assets/images/a4d85bf7b4201ba079e7d0088dfce906c968b21c.png'),
   },
 ];
 
@@ -51,16 +51,16 @@ export default function HomeScreen() {
     if (actionId === '1') {
       router.push('/create-ticket');
     } else if (actionId === '2') {
-      router.push('/(tabs)/services');
+      router.push('/services/pay-taxes');
     } else if (actionId === '3') {
-      router.push('/(tabs)/discover');
+      router.push('/services/get-documents');
     } else {
       router.push('/(tabs)/services');
     }
   };
 
   const handleEventPress = (eventId: string) => {
-    // Navigate to event details
+    router.push(`/events/${eventId}`);
   };
 
   const getUserInitials = () => {
@@ -165,22 +165,30 @@ export default function HomeScreen() {
                 onPress={() => handleEventPress(event.id)}
               >
                 <Image
-                  source={{ uri: event.image }}
+                  source={event.image}
                   style={styles.eventImage}
                 />
                 {event.isLive && (
                   <View style={styles.liveBadge}>
-                    <Ionicons name="radio-button-on" size={12} color="#EF4444" />
+                    <View style={styles.liveIndicator} />
                     <ThemedText style={styles.liveBadgeText}>Live</ThemedText>
                   </View>
                 )}
                 <View style={styles.eventInfo}>
-                  <ThemedText style={styles.eventTitle}>{event.title}</ThemedText>
-                  <ThemedText style={styles.eventLocation}>{event.location}</ThemedText>
+                  <View style={styles.eventTextContainer}>
+                    <ThemedText style={styles.eventTitle}>{event.title}</ThemedText>
+                    <ThemedText style={styles.eventLocation}>{event.location}</ThemedText>
+                  </View>
+                  <Pressable 
+                    style={styles.viewButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleEventPress(event.id);
+                    }}
+                  >
+                    <ThemedText style={styles.viewButtonText}>View</ThemedText>
+                  </Pressable>
                 </View>
-                <Pressable style={styles.viewButton}>
-                  <ThemedText style={styles.viewButtonText}>View</ThemedText>
-                </Pressable>
               </Pressable>
             ))}
           </ScrollView>
@@ -202,13 +210,30 @@ export default function HomeScreen() {
             contentContainerStyle={styles.placesContent}
           >
             {PLACES.map((place) => (
-              <View key={place.id} style={styles.placeCard}>
+              <Pressable
+                key={place.id}
+                style={styles.placeCard}
+                onPress={() => handleEventPress(place.id)}
+              >
                 <Image
-                  source={{ uri: place.image }}
+                  source={place.image}
                   style={styles.placeImage}
                 />
-                <ThemedText style={styles.placeTitle}>{place.title}</ThemedText>
-              </View>
+                <View style={styles.placeInfo}>
+                  <View style={styles.placeTextContainer}>
+                    <ThemedText style={styles.placeTitle}>{place.title}</ThemedText>
+                  </View>
+                  <Pressable 
+                    style={styles.viewButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleEventPress(place.id);
+                    }}
+                  >
+                    <ThemedText style={styles.viewButtonText}>View</ThemedText>
+                  </Pressable>
+                </View>
+              </Pressable>
             ))}
           </ScrollView>
         </View>
@@ -372,10 +397,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
   quickActionIcon: {
     width: 44,
@@ -400,7 +421,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   eventCard: {
-    width: 160,
+    width: 246,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     overflow: 'hidden',
@@ -409,7 +430,7 @@ const styles = StyleSheet.create({
   },
   eventImage: {
     width: '100%',
-    height: 100,
+    height: 246,
     resizeMode: 'cover',
   },
   liveBadge: {
@@ -417,12 +438,18 @@ const styles = StyleSheet.create({
     top: 8,
     right: 8,
     flexDirection: 'row',
-    backgroundColor: '#000000',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
+  },
+  liveIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
   },
   liveBadgeText: {
     fontSize: 10,
@@ -431,6 +458,13 @@ const styles = StyleSheet.create({
   },
   eventInfo: {
     padding: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  eventTextContainer: {
+    flex: 1,
+    marginRight: 12,
   },
   eventTitle: {
     fontSize: 13,
@@ -443,12 +477,11 @@ const styles = StyleSheet.create({
     color: '#6B7280',
   },
   viewButton: {
-    marginHorizontal: 12,
-    marginBottom: 12,
     paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: '#000000',
-    borderRadius: 6,
+    paddingHorizontal: 16,
+    backgroundColor: '#1F2937',
+    borderRadius: 20,
+    minWidth: 60,
     alignItems: 'center',
   },
   viewButtonText: {
@@ -464,18 +497,32 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   placeCard: {
-    width: 140,
+    width: 246,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   placeImage: {
     width: '100%',
-    height: 140,
-    borderRadius: 12,
+    height: 246,
     resizeMode: 'cover',
   },
+  placeInfo: {
+    padding: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  placeTextContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
   placeTitle: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
     color: '#1F2937',
-    marginTop: 8,
+    marginBottom: 4,
   },
 });

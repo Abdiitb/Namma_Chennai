@@ -95,7 +95,7 @@ export default function TabLayout() {
             </Text>
           ),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'document-text' : 'document-text-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'ticket' : 'ticket-outline'} size={24} color={color} />
           ),
         }}
       />
