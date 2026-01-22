@@ -1,9 +1,10 @@
-import { StyleSheet, View, ScrollView, Pressable, Image } from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable, Image, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAuth } from '@/context/auth-context';
+import { useLanguage } from '@/context/language-context';
 
 const QUICK_ACTIONS = [
   { id: '1', title: 'Raise a\nComplaint', icon: 'alert-circle-outline' as const, color: '#EC4899' },
@@ -44,6 +45,7 @@ const PLACES = [
 
 export default function HomeScreen() {
   const { user } = useAuth();
+  const { language, toggleLanguage } = useLanguage();
 
   const handleQuickAction = (actionId: string) => {
     if (actionId === '1') {
@@ -61,10 +63,51 @@ export default function HomeScreen() {
     // Navigate to event details
   };
 
+  const getUserInitials = () => {
+    if (user?.name) {
+      const names = user.name.split(' ');
+      if (names.length >= 2) {
+        return `${names[0][0]}${names[1][0]}`.toUpperCase();
+      }
+      return user.name.substring(0, 2).toUpperCase();
+    }
+    return 'U';
+  };
+
+  const handleSearchPress = () => {
+    // Navigate to search screen or handle search
+  };
+
+  const handleAnnouncementPress = () => {
+    // Navigate to announcements or handle notification
+  };
+
+  const handleProfilePress = () => {
+    // Navigate to profile screen
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <ThemedText style={styles.headerTitle}>Home</ThemedText>
+        {/* Profile Picture */}
+        <Pressable style={styles.profileContainer} onPress={handleProfilePress}>
+          <View style={styles.profileAvatar}>
+            <ThemedText style={styles.profileInitials}>{getUserInitials()}</ThemedText>
+          </View>
+        </Pressable>
+
+        {/* Empty space that takes up remaining width */}
+        <View style={styles.spacer} />
+
+        {/* Language Toggle */}
+        <Pressable style={styles.languageButton} onPress={toggleLanguage}>
+          <ThemedText style={styles.languageText}>{language === 'en' ? 'த' : 'en'}</ThemedText>
+        </Pressable>
+
+        {/* Announcement Icon */}
+        <Pressable style={styles.announcementButton} onPress={handleAnnouncementPress}>
+          <Ionicons name="megaphone-outline" size={20} color="#313131" />
+        </Pressable>
       </View>
       
       <ScrollView 
@@ -182,16 +225,91 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    gap: 12,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
+  profileContainer: {
+    marginRight: 4,
+  },
+  profileAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFD600',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileInitials: {
+    fontSize: 14,
+    fontWeight: '600',
     color: '#000000',
+  },
+  spacer: {
+    flex: 1,
+  },
+  languageButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+    marginRight: 8,
+  },
+  languageText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#313131',
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchPlaceholder: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    flex: 1,
+  },
+  announcementButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   content: {
     flex: 1,

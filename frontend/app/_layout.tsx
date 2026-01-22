@@ -1,5 +1,6 @@
 import { AuthProvider } from '@/context/auth-context';
 import { useAuth } from '@/context/auth-context';
+import { LanguageProvider } from '@/context/language-context';
 import { ThemeProvider } from '@react-navigation/native';
 import { YellowBlackTheme, ThemeColors } from '@/constants/theme';
 import { expoSQLiteStoreProvider } from '@rocicorp/zero/expo-sqlite';
@@ -20,9 +21,11 @@ export const unstable_settings = {
 export default function RootLayout() {
   // Only provide context and providers, no conditional rendering here
   return (
-    <AuthProvider>
-      <InnerRootLayout />
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <InnerRootLayout />
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 
