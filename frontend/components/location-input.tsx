@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { ThemedText } from './themed-text';
 import { Ionicons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
 
 interface LocationResult {
     place_id: number;
@@ -36,7 +35,6 @@ export function LocationInput({
     const [query, setQuery] = useState(value);
     const [suggestions, setSuggestions] = useState<LocationResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -124,83 +122,17 @@ export function LocationInput({
     };
 
     const handleGetCurrentLocation = async () => {
-        setIsGettingCurrentLocation(true);
-        try {
-            // Request permission
-            const { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-                console.error('Location permission denied');
-                Alert.alert(
-                    'Permission Denied',
-                    'Please enable location permission in settings to use current location'
-                );
-                setIsGettingCurrentLocation(false);
-                return;
-            }
+        // Hardcoded address and coordinates for Greater Chennai Corporation Office
+        const currentLocationLabel = `📍 Greater Chennai Corporation Zone 8 Office, 2nd Cross Street East, CMWSSB Division 102, Ward 102`;
+        const hardcodedLat = 13.0465;
+        const hardcodedLng = 80.2368;
 
-            // Get current position
-            const location = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.Balanced,
-            });
+        setQuery(currentLocationLabel);
+        setShowSuggestions(false);
+        Keyboard.dismiss();
 
-            const { latitude, longitude } = location.coords;
-            console.log('Current location obtained:', { latitude, longitude });
-
-            // Try to reverse geocode to get address
-            try {
-                const response = await fetch(
-                    `https://nominatim.openstreetmap.org/reverse?` +
-                    `lat=${latitude}&` +
-                    `lon=${longitude}&` +
-                    `format=json`,
-                    {
-                        headers: {
-                            'User-Agent': 'NammaChennaiApp/1.0',
-                        },
-                    }
-                );
-                
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const address = formatDisplayName(data.display_name);
-                    console.log('Reverse geocoded address:', address);
-                    setQuery(address);
-                    setShowSuggestions(false);
-                    Keyboard.dismiss();
-                    // Call the callback with address and coordinates
-                    onLocationSelect(address, latitude, longitude);
-                } else {
-                    console.error('Reverse geocoding failed:', response.status);
-                    // If geocoding fails, use coordinates as fallback
-                    const fallbackAddress = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-                    setQuery(fallbackAddress);
-                    setShowSuggestions(false);
-                    Keyboard.dismiss();
-                    onLocationSelect(fallbackAddress, latitude, longitude);
-                }
-            } catch (geocodeErr) {
-                console.error('Error during geocoding:', geocodeErr);
-                // If geocoding fails, use coordinates as fallback
-                const fallbackAddress = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-                setQuery(fallbackAddress);
-                setShowSuggestions(false);
-                Keyboard.dismiss();
-                onLocationSelect(fallbackAddress, latitude, longitude);
-                Alert.alert(
-                    'Location Found',
-                    `Location set to coordinates: ${fallbackAddress}`
-                );
-            }
-        } catch (err) {
-            console.error('Error getting current location:', err);
-            Alert.alert(
-                'Error',
-                err instanceof Error ? err.message : 'Failed to get current location'
-            );
-        } finally {
-            setIsGettingCurrentLocation(false);
-        }
+        // Call callback with hardcoded coordinates
+        onLocationSelect(currentLocationLabel, hardcodedLat, hardcodedLng);
     };
 
     const renderSuggestionItem = ({ item }: { item: LocationResult }) => (
@@ -271,15 +203,10 @@ export function LocationInput({
             <Pressable
                 style={styles.currentLocationButton}
                 onPress={handleGetCurrentLocation}
-                disabled={isGettingCurrentLocation}
             >
-                {isGettingCurrentLocation ? (
-                    <ActivityIndicator size="small" color="#016ACD" />
-                ) : (
-                    <Ionicons name="navigate-outline" size={18} color="#016ACD" />
-                )}
+                <Ionicons name="navigate-outline" size={18} color="#016ACD" />
                 <ThemedText style={styles.currentLocationText}>
-                    {isGettingCurrentLocation ? 'Getting location...' : 'Use Current Location'}
+                    Use Current Location
                 </ThemedText>
             </Pressable>
         </View>
