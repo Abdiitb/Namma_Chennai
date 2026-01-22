@@ -1,12 +1,9 @@
-import { StyleSheet, View, ScrollView, Pressable, TextInput, Image, Dimensions } from 'react-native';
-import React from 'react';
-import { router } from 'expo-router';
-import { HomeHeader } from '@/components/home-header';
+import { StyleSheet, View, ScrollView, Pressable, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
-import { useAuth } from '@/context/auth-context';
 import { Ionicons } from '@expo/vector-icons';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+import { router } from 'expo-router';
+import { useAuth } from '@/context/auth-context';
 
 const QUICK_ACTIONS = [
   { id: '1', title: 'Raise a\nComplaint', icon: 'alert-circle-outline' as const, color: '#EC4899' },
@@ -46,18 +43,17 @@ const PLACES = [
 ];
 
 export default function HomeScreen() {
-  const { user, logout } = useAuth();
-  const [carouselIndex, setCarouselIndex] = React.useState(0);
+  const { user } = useAuth();
 
   const handleQuickAction = (actionId: string) => {
     if (actionId === '1') {
       router.push('/create-ticket');
     } else if (actionId === '2') {
-      router.push('/(tabs)/explore');
+      router.push('/(tabs)/services');
     } else if (actionId === '3') {
       router.push('/(tabs)/discover');
     } else {
-      router.push('/(tabs)/explore');
+      router.push('/(tabs)/services');
     }
   };
 
@@ -66,54 +62,23 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <HomeHeader 
-        userName={user?.name || 'Citizen'} 
-        onProfilePress={() => logout()}
-      />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.header}>
+        <ThemedText style={styles.headerTitle}>Home</ThemedText>
+      </View>
       
       <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search-outline" size={20} color="#9CA3AF" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Find services, places..."
-            placeholderTextColor="#9CA3AF"
-          />
-          <Ionicons name="notifications-outline" size={20} color="#9CA3AF" />
-        </View>
-
-        {/* Carousel Banner */}
-        <View style={styles.carouselContainer}>
-          <Image
-            source={require('@/assets/images/react-logo.png')}
-            style={styles.carouselImage}
-          />
-          <View style={styles.carouselOverlay}>
-            <ThemedText style={styles.carouselTitle}>சிங்கார</ThemedText>
-            <ThemedText style={styles.carouselSubtitle}>சென்னை!</ThemedText>
-            <Pressable style={styles.viewMoreButton}>
-              <ThemedText style={styles.viewMoreText}>View More</ThemedText>
-            </Pressable>
-          </View>
-          
-          {/* Carousel Dots */}
-          <View style={styles.carouselDots}>
-            {[0, 1, 2, 3, 4].map((index) => (
-              <View
-                key={index}
-                style={[
-                  styles.dot,
-                  index === carouselIndex && styles.dotActive,
-                ]}
-              />
-            ))}
-          </View>
+        {/* Welcome Card */}
+        <View style={styles.welcomeCard}>
+          <Ionicons name="home" size={48} color="#016ACD" />
+          <ThemedText style={styles.welcomeTitle}>Welcome to Namma Chennai</ThemedText>
+          <ThemedText style={styles.welcomeSubtitle}>
+            Your gateway to city services and information
+          </ThemedText>
         </View>
 
         {/* Quick Actions */}
@@ -207,7 +172,7 @@ export default function HomeScreen() {
 
         <View style={{ height: 20 }} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -216,98 +181,53 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5',
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 24,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 16,
+  header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
   },
-  searchInput: {
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000000',
+  },
+  content: {
     flex: 1,
-    marginHorizontal: 12,
-    fontSize: 14,
-    color: '#1F2937',
   },
-  carouselContainer: {
-    marginHorizontal: 16,
-    marginBottom: 24,
-    borderRadius: 16,
-    overflow: 'hidden',
-    height: 200,
+  contentContainer: {
+    padding: 16,
+    paddingBottom: 24,
+  },
+  welcomeCard: {
     backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  carouselImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  carouselOverlay: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
-  carouselTitle: {
-    fontSize: 24,
+  welcomeTitle: {
+    fontSize: 22,
     fontWeight: '700',
-    color: '#FFFFFF',
-    lineHeight: 28,
-  },
-  carouselSubtitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#000000',
+    marginTop: 16,
     marginBottom: 8,
   },
-  viewMoreButton: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 16,
-    alignSelf: 'flex-start',
-  },
-  viewMoreText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#1F2937',
-  },
-  carouselDots: {
-    position: 'absolute',
-    bottom: 12,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: '100%',
-    gap: 6,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-  },
-  dotActive: {
-    backgroundColor: '#FFFFFF',
-    width: 24,
+  welcomeSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
   },
   section: {
     paddingHorizontal: 16,
     marginBottom: 24,
+    marginTop: 16,
   },
   sectionHeader: {
     flexDirection: 'row',
