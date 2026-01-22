@@ -18,7 +18,7 @@ import {
     useSpeechRecognitionEvent,
 } from 'expo-speech-recognition';
 
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { AuthInput } from '@/components/auth-input';
@@ -44,16 +44,13 @@ const CATEGORIES = [
 
 export default function CreateTicketScreen() {
     const { user } = useAuth();
-    const params = useLocalSearchParams();
-    
-    // Initialize state from route params if available
-    const [title, setTitle] = useState((params.title as string) || '');
-    const [description, setDescription] = useState((params.description as string) || '');
-    const [category, setCategory] = useState((params.category as string) || '');
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [category, setCategory] = useState('');
     const [addressText, setAddressText] = useState('');
     const [lat, setLat] = useState<number | null>(null);
     const [lng, setLng] = useState<number | null>(null);
-    const [photos, setPhotos] = useState<string[]>((params.imageUri ? [params.imageUri as string] : []) as string[]);
+    const [photos, setPhotos] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [classifyingImages, setClassifyingImages] = useState(false);
@@ -66,6 +63,8 @@ export default function CreateTicketScreen() {
     }>({});
     const [showSuccess, setShowSuccess] = useState(false);
     const [successTicketData, setSuccessTicketData] = useState<any>(null);
+    const [analyzingImage, setAnalyzingImage] = useState(false);
+    const [currentImageAnalyzing, setCurrentImageAnalyzing] = useState('');
     const zero = useZero();
     const descriptionAtStart = useRef('');
     const recognitionRef = useRef<any>(null);
@@ -146,7 +145,7 @@ export default function CreateTicketScreen() {
             if (!result.canceled && result.assets[0]) {
                 const newPhotos = [...photos, result.assets[0].uri];
                 setPhotos(newPhotos);
-                // AI classification is now done before reaching this screen
+                classifyFirstImage(newPhotos);
             }
         } catch (error) {
             console.error('Error taking photo:', error);
@@ -172,7 +171,10 @@ export default function CreateTicketScreen() {
                 const newPhotos = result.assets.map(asset => asset.uri);
                 const updatedPhotos = [...photos, ...newPhotos].slice(0, 5);
                 setPhotos(updatedPhotos);
-                // AI classification is now done before reaching this screen
+                
+                if (updatedPhotos.length > 0) {
+                    classifyFirstImage(updatedPhotos);
+                }
             }
         } catch (error) {
             console.error('Error selecting photos:', error);
@@ -180,7 +182,89 @@ export default function CreateTicketScreen() {
         }
     };
 
-    // AI classification is now handled in upload-and-analyze screen
+    // Classify image using AI endpoint
+    const classifyFirstImage = async (photoUris: string[]) => {
+        if (photoUris.length === 0 || photos.length > 1) return;
+
+        setAnalyzingImage(true);
+        setCurrentImageAnalyzing(photoUris[0]);
+        try {
+            const imageUri = photoUris[0]; // Classify the first image
+
+            // Convert image URI to base64
+            const response = await fetch(imageUri);
+            const blob = await response.blob();
+            const reader = new FileReader();
+
+            reader.onload = async () => {
+                const base64String = reader.result as string;
+
+                try {
+            // Send to classification endpoint
+            const classifyResponse = await fetch(`${API_BASE_URL}/api/ai/classify-image`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                            image: base64String,
+                }),
+            });
+
+            if (classifyResponse.ok) {
+                const result = await classifyResponse.json();
+                console.log('Classification result:', result);
+                
+                // Set category from API result
+                if (result.category) {
+                    setCategory(result.category);
+                    console.log('Category set to:', result.category);
+                }
+
+                // Set title if not already provided
+                if (result.title && !title) {
+                    setTitle(result.title);
+                    console.log('Title set to:', result.title);
+                }
+                
+                // Set description if not already provided
+                if (result.description && !description) {
+                    setDescription(result.description);
+                    console.log('Description set to:', result.description);
+                }
+
+                // Show success for 1 second then dismiss
+                setTimeout(() => {
+                    setAnalyzingImage(false);
+                    setCurrentImageAnalyzing('');
+                    RNAlert.alert(
+                        'Image Analyzed Successfully',
+                        `Category: ${result.category || 'Unknown'}\n\nYou can review and edit the details below.`,
+                        [{ text: 'OK' }]
+                    );
+                }, 1000);
+
+            } else {
+                        console.warn('Classification failed:', classifyResponse.statusText);
+                        setAnalyzingImage(false);
+                        setCurrentImageAnalyzing('');
+                        RNAlert.alert('Analysis Failed', 'Could not analyze the image. Please try again.');
+            }
+        } catch (err) {
+            console.warn('Error classifying image:', err);
+                    setAnalyzingImage(false);
+                    setCurrentImageAnalyzing('');
+                    RNAlert.alert('Error', 'Failed to analyze image. Please try again.');
+        }
+    };
+
+            reader.readAsDataURL(blob);
+        } catch (error) {
+            console.error('Error preparing image for classification:', error);
+            setAnalyzingImage(false);
+            setCurrentImageAnalyzing('');
+        }
+    };
 
 
 
@@ -490,7 +574,7 @@ export default function CreateTicketScreen() {
                     <Ionicons name="chevron-back" size={24} color="#1F2937" />
                 </Pressable>
                 <ThemedText style={styles.headerTitle}>
-                    Review details
+                    {title || 'New Issue'}
                 </ThemedText>
                 <View style={styles.placeholder} />
             </View>
@@ -524,26 +608,17 @@ export default function CreateTicketScreen() {
                         />
                     </View>
 
-                    {/* Detected Issue / Title */}
-                    {params.title ? (
-                        <View style={styles.section}>
-                            <ThemedText style={styles.label}>Detected Issue</ThemedText>
-                            <View style={styles.detectedIssueContainer}>
-                                <ThemedText style={styles.detectedIssueText}>{title || (params.title as string)}</ThemedText>
-                            </View>
-                        </View>
-                    ) : (
-                        <View style={styles.section}>
-                            <AuthInput
-                                label="Issue Title *"
-                                placeholder="Brief title for your issue"
-                                value={title}
-                                onChangeText={setTitle}
-                                error={errors.title}
-                                autoCapitalize="sentences"
-                            />
-                        </View>
-                    )}
+                    {/* Title */}
+                    <View style={styles.section}>
+                        <AuthInput
+                            label="Issue Title *"
+                            placeholder="Brief title for your issue"
+                            value={title}
+                            onChangeText={setTitle}
+                            error={errors.title}
+                            autoCapitalize="sentences"
+                        />
+                    </View>
 
                     {/* Location Section */}
                     <View style={styles.sectionWithHeader}>
@@ -618,6 +693,14 @@ export default function CreateTicketScreen() {
                                 {photos.map((uri, index) => (
                                     <View key={index} style={styles.photoPreview}>
                                         <Image source={{ uri }} style={styles.photoImage} />
+                                        
+                                        {/* Small Analyzing Overlay */}
+                                        {analyzingImage && currentImageAnalyzing === uri && (
+                                            <View style={styles.analyzingOverlay}>
+                                                <ActivityIndicator size="small" color="#F59E0B" />
+                                                <ThemedText style={styles.analyzingOverlayText}>Analyzing...</ThemedText>
+                                            </View>
+                                        )}
                                         
                                         <Pressable
                                             style={styles.removePhotoButton}
@@ -1024,17 +1107,22 @@ const styles = StyleSheet.create({
     successButtonContainer: {
         paddingBottom: 16,
     },
-    detectedIssueContainer: {
-        backgroundColor: '#F9FAFB',
+    // Analyzing Overlay Styles (Small)
+    analyzingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
         borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#E5E7EB',
-        padding: 14,
-        marginTop: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
     },
-    detectedIssueText: {
-        fontSize: 15,
-        color: '#1F2937',
+    analyzingOverlayText: {
+        fontSize: 12,
+        color: '#FFFFFF',
         fontWeight: '500',
     },
     // Analyzing Image Screen Styles (Removed - now using small overlay)

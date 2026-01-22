@@ -175,7 +175,7 @@ export default function TicketsScreen() {
       <Pressable 
         style={styles.fab}
         onPress={() => {
-          router.push('/upload-and-analyze');
+          router.push('/create-ticket');
         }}
       >
         <Ionicons name="add" size={28} color="#000000" />

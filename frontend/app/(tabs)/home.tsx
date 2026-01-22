@@ -51,7 +51,7 @@ export default function HomeScreen() {
 
   const handleQuickAction = (actionId: string) => {
     if (actionId === '1') {
-      router.push('/upload-and-analyze');
+      router.push('/create-ticket');
     } else if (actionId === '2') {
       router.push('/services/pay-taxes');
     } else if (actionId === '3') {
