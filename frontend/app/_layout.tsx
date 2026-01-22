@@ -37,7 +37,7 @@ function InnerRootLayout() {
         mutators={mutators}
         userID={user ? user.id : 'anon'}
         auth={user?.token ?? ''}
-        server='http://localhost:4848'
+        server='http://65.2.128.28:4848'
         kvStore={Platform.OS !== 'web' ? expoSQLiteStoreProvider() : 'idb'}
       >
         <ThemeProvider value={YellowBlackTheme}>
