@@ -34,11 +34,13 @@ const PLACES = [
   {
     id: '1',
     title: 'Victoria Public Hall',
+    unique_name: 'victoria-public-hall',
     image: require('@/assets/images/e106eefd9b743fb246e8a5b539e805c405bd7e60.png'),
   },
   {
     id: '2',
     title: 'Rippon Building',
+    unique_name: 'rippon-building',
     image: require('@/assets/images/a4d85bf7b4201ba079e7d0088dfce906c968b21c.png'),
   },
 ];
@@ -61,6 +63,10 @@ export default function HomeScreen() {
 
   const handleEventPress = (eventId: string) => {
     router.push(`/events/${eventId}`);
+  };
+
+  const handlePlacePress = (uniqueName: string) => {
+    router.push(`/places/${uniqueName}`);
   };
 
   const getUserInitials = () => {
@@ -213,7 +219,7 @@ export default function HomeScreen() {
               <Pressable
                 key={place.id}
                 style={styles.placeCard}
-                onPress={() => handleEventPress(place.id)}
+                onPress={() => handlePlacePress(place.unique_name)}
               >
                 <Image
                   source={place.image}
@@ -227,7 +233,7 @@ export default function HomeScreen() {
                     style={styles.viewButton}
                     onPress={(e) => {
                       e.stopPropagation();
-                      handleEventPress(place.id);
+                      handlePlacePress(place.unique_name);
                     }}
                   >
                     <ThemedText style={styles.viewButtonText}>View</ThemedText>

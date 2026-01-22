@@ -112,7 +112,7 @@ app.post('/api/zero/query', async (req, res) => {
     
     // Pass the body directly to handleQueryRequest (it accepts ReadonlyJSONValue)
     const result = await handleQueryRequest(
-      (name, args) => {
+      (name: string, args: any) => {
         console.log(`Transforming query: ${name}`, args);
         const query = mustGetQuery(ZERO_QUERIES, name);
         // For anonymous/development access, use 'anon' as userID
@@ -154,8 +154,8 @@ app.post('/api/zero/mutate', authMiddleware, async (req: AuthenticatedRequest, r
     }
     const result = await handleMutateRequest(
       dbProvider,
-      (transact) =>
-        transact(async (tx, name, args) => {
+      (transact: any) =>
+        transact(async (tx: any, name: string, args: any) => {
           console.log(`Processing mutator: ${name} for user: ${ctx.userID} (${ctx.role})`);
           const mutator = mustGetMutator(mutators, name);
           return mutator.fn({
