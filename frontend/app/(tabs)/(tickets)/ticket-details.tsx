@@ -48,7 +48,13 @@ const getCategoryIcon = (category: string): keyof typeof Ionicons.glyphMap => {
 };
 
 const getCategoryColor = (category: string) => {
-  return '#FFD600';
+  switch (category?.toLowerCase()) {
+    case 'water': return '#06B6D4';
+    case 'electricity': return '#F59E0B';
+    case 'sanitation':
+    case 'garbage': return '#EC4899';
+    default: return '#667187';
+  }
 };
 
 export default function TicketDetailsScreen() {
@@ -212,11 +218,11 @@ export default function TicketDetailsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={22} color="#FFD600" />
+          <Ionicons name="arrow-back" size={22} color="#2196F3" />
         </Pressable>
         <ThemedText style={styles.headerTitle} numberOfLines={1}>Ticket Details</ThemedText>
         <Pressable style={styles.moreButton}>
-          <Ionicons name="ellipsis-vertical" size={20} color="#FFD600" />
+          <Ionicons name="ellipsis-vertical" size={20} color="#2196F3" />
         </Pressable>
       </View>
 
@@ -253,7 +259,7 @@ export default function TicketDetailsScreen() {
           {/* Location */}
           {params.address_text && (
             <View style={styles.locationBox}>
-              <Ionicons name="location" size={16} color="#FFD600" />
+              <Ionicons name="location" size={16} color="#2196F3" />
               <ThemedText style={styles.locationText}>{params.address_text}</ThemedText>
             </View>
           )}
@@ -268,7 +274,7 @@ export default function TicketDetailsScreen() {
                 style={styles.addPhotoButton}
                 onPress={() => setShowPhotoOptions(true)}
               >
-                <Ionicons name="camera-outline" size={18} color="#FFD600" />
+                <Ionicons name="camera-outline" size={18} color="#2196F3" />
                 <ThemedText style={styles.addPhotoButtonText}>Add Photo</ThemedText>
               </Pressable>
             )}
@@ -337,14 +343,14 @@ export default function TicketDetailsScreen() {
 
               <Pressable style={styles.photoOption} onPress={handleTakePhoto}>
                 <View style={styles.photoOptionIcon}>
-                  <Ionicons name="camera" size={24} color="#FFD600" />
+                  <Ionicons name="camera" size={24} color="#2196F3" />
                 </View>
                 <ThemedText style={styles.photoOptionText}>Take Photo</ThemedText>
               </Pressable>
 
               <Pressable style={styles.photoOption} onPress={handleSelectFromGallery}>
                 <View style={styles.photoOptionIcon}>
-                  <Ionicons name="images" size={24} color="#FFD600" />
+                  <Ionicons name="images" size={24} color="#2196F3" />
                 </View>
                 <ThemedText style={styles.photoOptionText}>Choose from Gallery</ThemedText>
               </Pressable>
@@ -395,34 +401,34 @@ export default function TicketDetailsScreen() {
               icon="calendar-outline"
               label="Created"
               value={createdAt}
-              iconColor="#FFD600"
+              iconColor="#2196F3"
             />
             <DetailItem
               icon="time-outline"
               label="Last Updated"
               value={updatedAt}
-              iconColor="#FFD600"
+              iconColor="#2196F3"
             />
             {closedAt && (
               <DetailItem
                 icon="checkmark-done-outline"
                 label="Closed"
                 value={closedAt}
-                iconColor="#FFD600"
+                iconColor="#2196F3"
               />
             )}
             <DetailItem
               icon="person-outline"
               label="Created By"
               value={createdByName}
-              iconColor="#FFD600"
+              iconColor="#2196F3"
             />
             {params.assigned_to && (
               <DetailItem
                 icon="people-outline"
                 label="Assigned To"
                 value={assignedToName}
-                iconColor="#FFD600"
+                iconColor="#2196F3"
               />
             )}
             {params.current_supervisor && (
@@ -430,7 +436,7 @@ export default function TicketDetailsScreen() {
                 icon="shield-checkmark-outline"
                 label="Supervisor"
                 value={supervisorName}
-                iconColor="#FFD600"
+                iconColor="#2196F3"
               />
             )}
           </View>
@@ -457,7 +463,7 @@ export default function TicketDetailsScreen() {
 
             {params.citizen_feedback && (
               <View style={styles.feedbackTextBox}>
-                <Ionicons name="chatbubble-ellipses-outline" size={16} color="#FFD600" />
+                <Ionicons name="chatbubble-ellipses-outline" size={16} color="#2196F3" />
                 <ThemedText style={styles.feedbackText}>
                   "{params.citizen_feedback}"
                 </ThemedText>
@@ -477,20 +483,20 @@ export default function TicketDetailsScreen() {
         <View style={styles.actionsContainer}>
           {params.status !== 'resolved' && (
             <Pressable style={styles.primaryButton}>
-              <Ionicons name="chatbubble-outline" size={18} color="#000000" />
+              <Ionicons name="chatbubble-outline" size={18} color="#FFFFFF" />
               <ThemedText style={styles.primaryButtonText}>Add Comment</ThemedText>
             </Pressable>
           )}
 
           {params.status === 'resolved' && !params.citizen_rating && (
             <Pressable style={styles.primaryButton}>
-              <Ionicons name="star-outline" size={18} color="#000000" />
+              <Ionicons name="star-outline" size={18} color="#FFFFFF" />
               <ThemedText style={styles.primaryButtonText}>Rate Service</ThemedText>
             </Pressable>
           )}
 
           <Pressable style={styles.secondaryButton}>
-            <Ionicons name="share-outline" size={18} color="#000000" />
+            <Ionicons name="share-outline" size={18} color="#2196F3" />
             <ThemedText style={styles.secondaryButtonText}>Share</ThemedText>
           </Pressable>
         </View>
@@ -531,9 +537,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: isSmallScreen ? 12 : 16,
     paddingVertical: 10,
-    backgroundColor: '#000000',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#1A1A1A',
+    borderBottomColor: '#F3F4F6',
     gap: 8,
   },
   backButton: {
@@ -542,14 +548,14 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1A1A1A',
+    backgroundColor: '#F5F5F5',
     flexShrink: 0,
   },
   headerTitle: {
     flex: 1,
     fontSize: isSmallScreen ? 16 : 18,
     fontWeight: '600',
-    color: '#FFD600',
+    color: '#333333',
     textAlign: 'center',
   },
   moreButton: {
@@ -582,11 +588,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: isSmallScreen ? 12 : 16,
     padding: isSmallScreen ? 14 : 20,
-    borderWidth: 1,
-    borderColor: '#000000',
+    borderWidth: 0,
+    borderColor: '#E5E7EB',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
   },
@@ -620,7 +626,7 @@ const styles = StyleSheet.create({
   ticketIdText: {
     fontSize: isSmallScreen ? 12 : 13,
     fontWeight: '600',
-    color: '#000000',
+    color: '#1F2937',
   },
   categoryText: {
     fontSize: isSmallScreen ? 11 : 12,
@@ -648,7 +654,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: isSmallScreen ? 17 : 20,
     fontWeight: '700',
-    color: '#000000',
+    color: '#1F2937',
     marginBottom: 8,
     lineHeight: isSmallScreen ? 24 : 28,
   },
@@ -661,7 +667,7 @@ const styles = StyleSheet.create({
   locationBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#1A1A1A',
+    backgroundColor: '#E3F2FD',
     padding: isSmallScreen ? 10 : 12,
     borderRadius: 10,
     gap: 8,
@@ -669,16 +675,21 @@ const styles = StyleSheet.create({
   locationText: {
     flex: 1,
     fontSize: isSmallScreen ? 12 : 13,
-    color: '#FFD600',
+    color: '#1976D2',
     lineHeight: 18,
   },
   attachmentsCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: isSmallScreen ? 12 : 16,
     padding: isSmallScreen ? 14 : 20,
-    borderWidth: 1,
-    borderColor: '#000000',
+    borderWidth: 0,
+    borderColor: '#E5E7EB',
     marginTop: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   attachmentsHeader: {
     flexDirection: 'row',
@@ -690,7 +701,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: '#E3F2FD',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
@@ -698,7 +709,7 @@ const styles = StyleSheet.create({
   addPhotoButtonText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#FFD600',
+    color: '#2196F3',
   },
   attachmentsContainer: {
     gap: 12,
@@ -747,7 +758,7 @@ const styles = StyleSheet.create({
   photoOptionsTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000000',
+    color: '#1F2937',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -762,14 +773,14 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#1A1A1A',
+    backgroundColor: '#E3F2FD',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
   },
   photoOptionText: {
     fontSize: 16,
-    color: '#000000',
+    color: '#1F2937',
     fontWeight: '500',
   },
   photoOptionCancel: {
@@ -810,14 +821,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: isSmallScreen ? 12 : 16,
     padding: isSmallScreen ? 14 : 20,
-    borderWidth: 1,
-    borderColor: '#000000',
+    borderWidth: 0,
+    borderColor: '#E5E7EB',
     marginTop: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   sectionTitle: {
     fontSize: isSmallScreen ? 13 : 14,
     fontWeight: '600',
-    color: '#000000',
+    color: '#333333',
     marginBottom: isSmallScreen ? 12 : 16,
   },
   detailsGrid: {
@@ -849,7 +865,7 @@ const styles = StyleSheet.create({
   },
   detailValue: {
     fontSize: isSmallScreen ? 13 : 14,
-    color: '#000000',
+    color: '#1F2937',
     fontWeight: '500',
     marginTop: 2,
   },
@@ -857,9 +873,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: isSmallScreen ? 12 : 16,
     padding: isSmallScreen ? 14 : 20,
-    borderWidth: 1,
-    borderColor: '#000000',
+    borderWidth: 0,
+    borderColor: '#E5E7EB',
     marginTop: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   ratingContainer: {
     marginBottom: isSmallScreen ? 12 : 16,
@@ -877,7 +898,7 @@ const styles = StyleSheet.create({
   feedbackTextBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#1A1A1A',
+    backgroundColor: '#E3F2FD',
     padding: isSmallScreen ? 12 : 14,
     borderRadius: 10,
     gap: 8,
@@ -885,7 +906,7 @@ const styles = StyleSheet.create({
   feedbackText: {
     flex: 1,
     fontSize: isSmallScreen ? 13 : 14,
-    color: '#FFFFFF',
+    color: '#1976D2',
     fontStyle: 'italic',
     lineHeight: 20,
   },
@@ -909,12 +930,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFD600',
+    backgroundColor: '#2196F3',
     paddingVertical: isSmallScreen ? 12 : 14,
     paddingHorizontal: isSmallScreen ? 16 : 20,
     borderRadius: 12,
     gap: 8,
-    shadowColor: '#FFD600',
+    shadowColor: '#2196F3',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
@@ -923,7 +944,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     fontSize: isSmallScreen ? 14 : 15,
     fontWeight: '600',
-    color: '#000000',
+    color: '#FFFFFF',
   },
   secondaryButton: {
     flexDirection: 'row',
@@ -931,7 +952,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#000000',
+    borderColor: '#E5E7EB',
     paddingVertical: isSmallScreen ? 12 : 14,
     paddingHorizontal: isSmallScreen ? 16 : 20,
     borderRadius: 12,
@@ -940,6 +961,6 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     fontSize: isSmallScreen ? 14 : 15,
     fontWeight: '600',
-    color: '#000000',
+    color: '#1F2937',
   },
 });

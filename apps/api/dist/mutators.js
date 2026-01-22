@@ -35,6 +35,7 @@ async function checkTicketAccess(ticketId, userID, role) {
     return result.rows[0];
 }
 async function createTicket(input, auth) {
+    console.log('Creating ticket with input:', input, 'and auth:', auth);
     if (auth.role !== 'citizen') {
         throw new Error('Only citizens can create tickets');
     }
@@ -50,7 +51,7 @@ async function createTicket(input, auth) {
            VALUES ($1, $2, 'photo', $3)`, [ticketId, auth.userID, url]);
             }
         }
-        return { ticketId };
+        return { id: ticketId };
     });
 }
 async function assignTicket(input, auth) {

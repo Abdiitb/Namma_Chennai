@@ -10,14 +10,15 @@ import { useAuth } from '@/context/auth-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const TABS = ['All', 'New', 'Assigned', 'In Progress', 'Waiting Supervisor', 'Resolved'];
+const TABS = ['Open', 'Assigned', 'Completed' , 'All'];
 
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'open': return '#EF4444';
     case 'in_progress': return '#F59E0B';
     case 'resolved': return '#10B981';
-    default: return '#6B7280';
+
+    default: return '#10B981';
   }
 };
 
@@ -70,7 +71,11 @@ export default function TicketsScreen() {
 
   const filteredTickets = tickets.filter(ticket => {
     if (selectedTab === 'All') return true;
-    return getStatusLabel(ticket.status) === selectedTab.toLowerCase().replace(' ', '_');
+    // return getStatusLabel(ticket.status) === selectedTab.toLowerCase().replace(' ', '_');
+    if (selectedTab === 'Open') return ticket.status === 'open';
+    if (selectedTab === 'Assigned') return ticket.status === 'in_progress' || ticket.status === 'assigned';
+    if (selectedTab === 'Completed') return ticket.status === 'resolved';
+    return true;
   });
 
   console.log('Filtered tickets for tab', selectedTab, ':', filteredTickets);
@@ -79,10 +84,7 @@ export default function TicketsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <ThemedText style={styles.headerTitle}>My Tickets</ThemedText>
-        <Pressable style={styles.filterButton}>
-          <Ionicons name="filter-outline" size={20} color="#FFD600" />
-        </Pressable>
+        <ThemedText style={styles.headerTitle}>Grievances</ThemedText>
       </View>
 
       {/* Scrollable Tabs */}
@@ -99,9 +101,22 @@ export default function TicketsScreen() {
               style={[styles.tab, selectedTab === tab && styles.tabActive]}
               onPress={() => setSelectedTab(tab)}
             >
-              <ThemedText style={[styles.tabText, selectedTab === tab && styles.tabTextActive]}>
-                {tab}
-              </ThemedText>
+              <View style={styles.tabContent}>
+                {selectedTab === tab && (
+                  <Ionicons 
+                    name={
+                      tab === 'Open' ? 'radio-button-on' : 
+                      tab === 'Assigned' ? 'person' : 
+                      'checkmark-circle'
+                    } 
+                    size={16} 
+                    color="#000000" 
+                  />
+                )}
+                <ThemedText style={[styles.tabText, selectedTab === tab && styles.tabTextActive]}>
+                  {tab}
+                </ThemedText>
+              </View>
             </Pressable>
           ))}
         </ScrollView>
@@ -122,39 +137,33 @@ export default function TicketsScreen() {
               params: ticket
             })}
           >
-            <View style={styles.ticketHeader}>
-              <View style={styles.ticketIdContainer}>
-                <View style={[styles.categoryIcon, { backgroundColor: '#1A1A1A' }]}>
-                  <Ionicons name={getCategoryIcon(ticket.category)} size={18} color="#FFD600" />
+            <View style={styles.ticketTop}>
+              <View style={styles.ticketIconAndTitle}>
+                <View style={[styles.categoryIcon, { backgroundColor: '#E3F2FD' }]}>
+                  <Ionicons name={getCategoryIcon(ticket.category)} size={15} color="#2196F3" />
                 </View>
-                <View style={styles.ticketIdTextContainer}>
-                  <ThemedText style={styles.ticketId}>{ticket.id}</ThemedText>
-                  <ThemedText style={styles.ticketCategory}>{ticket.category}</ThemedText>
+                <View style={styles.ticketTitleContainer}>
+                  <ThemedText style={styles.ticketTitle} numberOfLines={2}>{ticket.title}</ThemedText>
                 </View>
-              </View>
-              <View style={[styles.statusBadge, { backgroundColor: getStatusColor(ticket.status) + '20' }]}>
-                <View style={[styles.statusDot, { backgroundColor: getStatusColor(ticket.status) }]} />
-                <ThemedText style={[styles.statusText, { color: getStatusColor(ticket.status) }]}>
-                  {getStatusLabel(ticket.status)}
-                </ThemedText>
               </View>
             </View>
 
-            <ThemedText style={styles.ticketTitle} numberOfLines={2}>{ticket.title}</ThemedText>
-            <ThemedText style={styles.ticketDescription} numberOfLines={2}>
-              {ticket.description}
-            </ThemedText>
+            <View style={styles.ticketLocation}>
+              {/* <ThemedText style={styles.locationText} numberOfLines={2}>
+                {ticket.description}
+              </ThemedText> */}
+            </View>
 
             <View style={styles.ticketFooter}>
-              <View style={styles.footerItem}>
-                <Ionicons name="calendar-outline" size={14} color="#9CA3AF" />
-                <ThemedText style={styles.footerText}>{formatDateTime(ticket.created_at)}</ThemedText>
-              </View>
-              {/* <View style={[styles.priorityBadge, { backgroundColor: getPriorityColor(ticket.priority) + '20' }]}>
-                <ThemedText style={[styles.priorityText, { color: getPriorityColor(ticket.priority) }]}>
-                  {ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1)} Priority
+              <View style={styles.statusInfo}>
+                <ThemedText style={styles.statusLabel}>Status: </ThemedText>
+                <ThemedText style={[styles.statusValue, { color: getStatusColor(ticket.status) }]}>
+                  {getStatusLabel(ticket.status)}
                 </ThemedText>
-              </View> */}
+              </View>
+              <View style={styles.dateInfo}>
+                <ThemedText style={styles.dateText}>Last Updated: {formatDateTime(ticket.updated_at || ticket.created_at)}</ThemedText>
+              </View>
             </View>
           </Pressable>
         ))}
@@ -183,172 +192,138 @@ export default function TicketsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F5F5F5',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#000000',
+    backgroundColor: '#333333',
+    paddingTop: 12,
   },
   headerTitle: {
-    fontSize: SCREEN_WIDTH < 375 ? 20 : 24,
-    fontWeight: 'bold',
-    color: '#FFD600',
-  },
-  filterButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#1A1A1A',
-    alignItems: 'center',
-    justifyContent: 'center',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   tabsWrapper: {
-    backgroundColor: '#000000',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#1A1A1A',
+    borderBottomColor: '#E5E5E5',
   },
   tabsScrollView: {
     flexGrow: 0,
   },
   tabsContentContainer: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
   },
   tab: {
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 16,
-    marginHorizontal: 4,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderRadius: 24,
+    backgroundColor: '#F5F5F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 100,
   },
   tabActive: {
-    borderBottomColor: '#FFD600',
+    backgroundColor: '#333333',
+  },
+  tabContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   },
   tabText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#666666',
     fontWeight: '500',
   },
   tabTextActive: {
-    color: '#FFD600',
+    color: '#FFFFFF',
     fontWeight: '600',
   },
   ticketsList: {
     flex: 1,
   },
   ticketsContent: {
-    padding: SCREEN_WIDTH < 375 ? 12 : 16,
+    padding: 16,
     paddingBottom: 100,
   },
   ticketCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: SCREEN_WIDTH < 375 ? 12 : 16,
+    padding: 16,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#000000',
+    borderWidth: 0,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  ticketHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+  ticketTop: {
     marginBottom: 12,
-    flexWrap: 'wrap',
-    gap: 8,
   },
-  ticketIdContainer: {
+  ticketIconAndTitle: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flex: 1,
-    minWidth: 0,
-  },
-  ticketIdTextContainer: {
-    flex: 1,
-    minWidth: 0,
+    alignItems: 'flex-start',
+    gap: 12,
   },
   categoryIcon: {
-    width: 36,
-    height: 36,
+    width: 30,
+    height: 30,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
   },
-  ticketId: {
-    fontSize: 12,
-    color: '#000000',
-    fontWeight: '600',
-  },
-  ticketCategory: {
-    fontSize: 11,
-    color: '#6B7280',
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 6,
-    flexShrink: 0,
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  statusText: {
-    fontSize: SCREEN_WIDTH < 375 ? 10 : 12,
-    fontWeight: '600',
+  ticketTitleContainer: {
+    flex: 1,
+    justifyContent: 'center',
   },
   ticketTitle: {
-    fontSize: SCREEN_WIDTH < 375 ? 14 : 16,
+    fontSize: 16,
     fontWeight: '600',
     color: '#000000',
-    marginBottom: 4,
   },
-  ticketDescription: {
-    fontSize: SCREEN_WIDTH < 375 ? 13 : 14,
-    color: '#6B7280',
-    lineHeight: 20,
+  ticketLocation: {
     marginBottom: 12,
   },
+  locationText: {
+    fontSize: 14,
+    color: '#0066CC',
+    textDecorationLine: 'underline',
+    lineHeight: 20,
+  },
   ticketFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#000000',
-    flexWrap: 'wrap',
-    gap: 8,
+    borderTopColor: '#E5E5E5',
+    paddingTop: 12,
   },
-  footerItem: {
+  statusInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    marginBottom: 8,
   },
-  footerText: {
-    fontSize: 12,
-    color: '#6B7280',
+  statusLabel: {
+    fontSize: 13,
+    color: '#666666',
+    fontWeight: '500',
   },
-  priorityBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  priorityText: {
-    fontSize: 11,
+  statusValue: {
+    fontSize: 13,
     fontWeight: '600',
+    color: '#0d690ebc',
+  },
+  dateInfo: {
+    marginBottom: 0,
+  },
+  dateText: {
+    fontSize: 12,
+    color: '#999999',
   },
   emptyState: {
     alignItems: 'center',
@@ -367,10 +342,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#FFD600',
+    backgroundColor: '#2196F3',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#FFD600',
+    shadowColor: '#2196F3',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

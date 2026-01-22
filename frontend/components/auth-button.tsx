@@ -8,6 +8,7 @@ interface AuthButtonProps {
   disabled?: boolean;
   variant?: 'primary' | 'secondary' | 'link';
   style?: ViewStyle;
+  textColor?: string; // Add this line
 }
 
 export function AuthButton({ 
@@ -17,6 +18,7 @@ export function AuthButton({
   disabled = false,
   variant = 'primary',
   style,
+  textColor, // Add this parameter
 }: AuthButtonProps) {
   const buttonStyle = [
     styles.button,
@@ -30,6 +32,7 @@ export function AuthButton({
     styles.buttonText,
     variant === 'secondary' && styles.buttonTextSecondary,
     variant === 'link' && styles.buttonTextLink,
+    textColor && { color: textColor }, // Apply custom text color
   ];
 
   return (
@@ -39,7 +42,7 @@ export function AuthButton({
       disabled={disabled || loading}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#000000' : '#FFD600'} />
+        <ActivityIndicator color={textColor || (variant === 'primary' ? '#000000' : '#FFD600')} />
       ) : (
         <ThemedText style={textStyle}>{title}</ThemedText>
       )}

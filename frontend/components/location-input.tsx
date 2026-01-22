@@ -7,6 +7,7 @@ import {
     FlatList,
     ActivityIndicator,
     Keyboard,
+    Alert,
 } from 'react-native';
 import { ThemedText } from './themed-text';
 import { Ionicons } from '@expo/vector-icons';
@@ -129,6 +130,11 @@ export function LocationInput({
             const { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
                 console.error('Location permission denied');
+                Alert.alert(
+                    'Permission Denied',
+                    'Please enable location permission in settings to use current location'
+                );
+                setIsGettingCurrentLocation(false);
                 return;
             }
 
@@ -138,29 +144,60 @@ export function LocationInput({
             });
 
             const { latitude, longitude } = location.coords;
+            console.log('Current location obtained:', { latitude, longitude });
 
-            // Reverse geocode to get address
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?` +
-                `lat=${latitude}&` +
-                `lon=${longitude}&` +
-                `format=json`,
-                {
-                    headers: {
-                        'User-Agent': 'NammaChennaiApp/1.0',
-                    },
+            // Try to reverse geocode to get address
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?` +
+                    `lat=${latitude}&` +
+                    `lon=${longitude}&` +
+                    `format=json`,
+                    {
+                        headers: {
+                            'User-Agent': 'NammaChennaiApp/1.0',
+                        },
+                    }
+                );
+                
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const address = formatDisplayName(data.display_name);
+                    console.log('Reverse geocoded address:', address);
+                    setQuery(address);
+                    setShowSuggestions(false);
+                    Keyboard.dismiss();
+                    // Call the callback with address and coordinates
+                    onLocationSelect(address, latitude, longitude);
+                } else {
+                    console.error('Reverse geocoding failed:', response.status);
+                    // If geocoding fails, use coordinates as fallback
+                    const fallbackAddress = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+                    setQuery(fallbackAddress);
+                    setShowSuggestions(false);
+                    Keyboard.dismiss();
+                    onLocationSelect(fallbackAddress, latitude, longitude);
                 }
-            );
-
-            if (response.ok) {
-                const data = await response.json();
-                const address = formatDisplayName(data.display_name);
-                setQuery(address);
+            } catch (geocodeErr) {
+                console.error('Error during geocoding:', geocodeErr);
+                // If geocoding fails, use coordinates as fallback
+                const fallbackAddress = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+                setQuery(fallbackAddress);
                 setShowSuggestions(false);
-                onLocationSelect(address, latitude, longitude);
+                Keyboard.dismiss();
+                onLocationSelect(fallbackAddress, latitude, longitude);
+                Alert.alert(
+                    'Location Found',
+                    `Location set to coordinates: ${fallbackAddress}`
+                );
             }
         } catch (err) {
             console.error('Error getting current location:', err);
+            Alert.alert(
+                'Error',
+                err instanceof Error ? err.message : 'Failed to get current location'
+            );
         } finally {
             setIsGettingCurrentLocation(false);
         }
@@ -237,9 +274,9 @@ export function LocationInput({
                 disabled={isGettingCurrentLocation}
             >
                 {isGettingCurrentLocation ? (
-                    <ActivityIndicator size="small" color="#6366F1" />
+                    <ActivityIndicator size="small" color="#016ACD" />
                 ) : (
-                    <Ionicons name="navigate-outline" size={18} color="#6366F1" />
+                    <Ionicons name="navigate-outline" size={18} color="#016ACD" />
                 )}
                 <ThemedText style={styles.currentLocationText}>
                     {isGettingCurrentLocation ? 'Getting location...' : 'Use Current Location'}
@@ -331,7 +368,7 @@ const styles = StyleSheet.create({
     },
     currentLocationText: {
         fontSize: 14,
-        color: '#6366F1',
+        color: '#016ACD',
         fontWeight: '500',
     },
 });

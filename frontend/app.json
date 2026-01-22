@@ -4,6 +4,10 @@
     "slug": "Namma_Chennai",
     "version": "1.0.0",
     "orientation": "portrait",
+    "updates": {
+      "enabled": false,
+      "checkAutomatically": "OFF"
+    },
     "icon": "./assets/images/icon.png",
     "scheme": "nammachennai",
     "userInterfaceStyle": "automatic",
@@ -70,14 +74,12 @@
           "locationWhenInUsePermission": "Allow Namma Chennai to access your location to auto-fill ticket address."
         }
       ],
-      [
-        "expo-speech-recognition",
+       [
+        "expo-build-properties",
         {
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone for voice input.",
-          "speechRecognitionPermission": "Allow $(PRODUCT_NAME) to use speech recognition.",
-          "androidSpeechServicePackages": [
-            "com.google.android.googlequicksearchbox"
-          ]
+          "android": {
+            "enableProguardInDebug": true
+          }
         }
       ]
     ],

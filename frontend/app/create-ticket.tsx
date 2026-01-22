@@ -24,6 +24,7 @@ import { ThemedText } from '@/components/themed-text';
 import { AuthInput } from '@/components/auth-input';
 import { AuthButton } from '@/components/auth-button';
 import { LocationInput } from '@/components/location-input';
+import { CategoryDropdown } from '@/components/category-dropdown';
 import { Alert } from '@/components/alert';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/context/auth-context';
@@ -35,10 +36,10 @@ import { API_BASE_URL } from '@/constants/api';
 
 // Categories from schema
 const CATEGORIES = [
-    { id: 'water', label: 'Water', icon: 'water-outline', color: '#06B6D4' },
-    { id: 'electricity', label: 'Electricity', icon: 'flash-outline', color: '#F59E0B' },
-    { id: 'sanitation', label: 'Garbage', icon: 'trash-outline', color: '#EC4899' },
-    { id: 'other', label: 'Other', icon: 'ellipsis-horizontal-outline', color: '#667187' },
+    { id: 'water issue', label: 'water issue', icon: 'water-outline', color: '#06B6D4' },
+    { id: 'electricity issue', label: 'electricity issue', icon: 'flash-outline', color: '#F59E0B' },
+    { id: 'garbage issue', label: 'garbage issue', icon: 'trash-outline', color: '#EC4899' },
+    { id: 'other issues', label: 'other issues', icon: 'ellipsis-horizontal-outline', color: '#667187' },
 ];
 
 export default function CreateTicketScreen() {
@@ -61,41 +62,44 @@ export default function CreateTicketScreen() {
         address?: string;
     }>({});
     const [showSuccess, setShowSuccess] = useState(false);
+    const [successTicketData, setSuccessTicketData] = useState<any>(null);
+    const [analyzingImage, setAnalyzingImage] = useState(false);
+    const [currentImageAnalyzing, setCurrentImageAnalyzing] = useState('');
     const zero = useZero();
     const descriptionAtStart = useRef('');
     const recognitionRef = useRef<any>(null);
 
     // Setup speech recognition events using hooks
-    useSpeechRecognitionEvent('start', () => {
-        console.log('Speech recognition started');
-        setIsListening(true);
-    });
+    // useSpeechRecognitionEvent('start', () => {
+    //     console.log('Speech recognition started');
+    //     setIsListening(true);
+    // });
 
-    useSpeechRecognitionEvent('end', () => {
-        console.log('Speech recognition ended');
-        setIsListening(false);
-    });
+    // useSpeechRecognitionEvent('end', () => {
+    //     console.log('Speech recognition ended');
+    //     setIsListening(false);
+    // });
 
-    useSpeechRecognitionEvent('result', (event) => {
-        console.log('Speech result:', event);
-        if (event.results && event.results.length > 0) {
-            const transcript = event.results[0]?.transcript || '';
-            if (transcript) {
-                const combinedText = descriptionAtStart.current
-                    ? `${descriptionAtStart.current.trim()} ${transcript.trim()}`
-                    : transcript.trim();
+    // useSpeechRecognitionEvent('result', (event) => {
+    //     console.log('Speech result:', event);
+    //     if (event.results && event.results.length > 0) {
+    //         const transcript = event.results[0]?.transcript || '';
+    //         if (transcript) {
+    //             const combinedText = descriptionAtStart.current
+    //                 ? `${descriptionAtStart.current.trim()} ${transcript.trim()}`
+    //                 : transcript.trim();
 
-                setDescription(combinedText.slice(0, 500));
-                console.log('Transcribed text:', combinedText);
-            }
-        }
-    });
+    //             setDescription(combinedText.slice(0, 500));
+    //             console.log('Transcribed text:', combinedText);
+    //         }
+    //     }
+    // });
 
-    useSpeechRecognitionEvent('error', (event) => {
-        console.error('Speech recognition error:', event.error, event.message);
-        setIsListening(false);
-        RNAlert.alert('Error', `Speech recognition failed: ${event.message}`);
-    });
+    // useSpeechRecognitionEvent('error', (event) => {
+    //     console.error('Speech recognition error:', event.error, event.message);
+    //     setIsListening(false);
+    //     RNAlert.alert('Error', `Speech recognition failed: ${event.message}`);
+    // });
 
     // Request camera permissions
     const requestCameraPermission = async () => {
@@ -182,7 +186,8 @@ export default function CreateTicketScreen() {
     const classifyFirstImage = async (photoUris: string[]) => {
         if (photoUris.length === 0 || photos.length > 1) return;
 
-        setClassifyingImages(true);
+        setAnalyzingImage(true);
+        setCurrentImageAnalyzing(photoUris[0]);
         try {
             const imageUri = photoUris[0]; // Classify the first image
 
@@ -209,37 +214,55 @@ export default function CreateTicketScreen() {
             if (classifyResponse.ok) {
                 const result = await classifyResponse.json();
                 console.log('Classification result:', result);
+                
+                // Set category from API result
                 if (result.category) {
                     setCategory(result.category);
-                    RNAlert.alert(
-                        'Category Detected',
-                        `Image classified as: ${result.category}`,
-                        [{ text: 'OK' }]
-                    );
+                    console.log('Category set to:', result.category);
                 }
 
+                // Set title if not already provided
                 if (result.title && !title) {
                     setTitle(result.title);
+                    console.log('Title set to:', result.title);
                 }
+                
+                // Set description if not already provided
                 if (result.description && !description) {
                     setDescription(result.description);
+                    console.log('Description set to:', result.description);
                 }
+
+                // Show success for 1 second then dismiss
+                setTimeout(() => {
+                    setAnalyzingImage(false);
+                    setCurrentImageAnalyzing('');
+                    RNAlert.alert(
+                        'Image Analyzed Successfully',
+                        `Category: ${result.category || 'Unknown'}\n\nYou can review and edit the details below.`,
+                        [{ text: 'OK' }]
+                    );
+                }, 1000);
 
             } else {
                         console.warn('Classification failed:', classifyResponse.statusText);
+                        setAnalyzingImage(false);
+                        setCurrentImageAnalyzing('');
+                        RNAlert.alert('Analysis Failed', 'Could not analyze the image. Please try again.');
             }
         } catch (err) {
             console.warn('Error classifying image:', err);
-                    // Don't show error to user - classification is optional
-        } finally {
-            setClassifyingImages(false);
+                    setAnalyzingImage(false);
+                    setCurrentImageAnalyzing('');
+                    RNAlert.alert('Error', 'Failed to analyze image. Please try again.');
         }
     };
 
             reader.readAsDataURL(blob);
         } catch (error) {
             console.error('Error preparing image for classification:', error);
-            setClassifyingImages(false);
+            setAnalyzingImage(false);
+            setCurrentImageAnalyzing('');
         }
     };
 
@@ -372,9 +395,10 @@ export default function CreateTicketScreen() {
         setError('');
         try {
             const attachmentUrls = photos;
+            const ticketId = `TKT-${Date.now()}`;
 
             const ticketData = {
-                id: `TKT-${Date.now()}`,
+                id: ticketId,
                 created_by: user?.id || '4c8d7866-be1c-4b5d-8cb1-71a9a5a09d7f',
                 category,
                 title: title.trim(),
@@ -407,10 +431,11 @@ export default function CreateTicketScreen() {
                 })
             );
 
+            setSuccessTicketData(ticketData);
             setShowSuccess(true);
             setTimeout(() => {
-                router.back();
-            }, 1500);
+                router.replace('/(tabs)/issues');
+            }, 3000);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to create ticket');
         } finally {
@@ -419,25 +444,138 @@ export default function CreateTicketScreen() {
     };
 
     const handleClose = () => {
-        router.back();
+        router.replace('/');
     };
 
+    // Helper function to get category color
+    const getCategoryColor = (cat: string): string => {
+        const categoryMap: { [key: string]: string } = {
+            'water issue': '#06B6D4',
+            'electricity issue': '#F59E0B',
+            'garbage issue': '#EC4899',
+            'other issues': '#667187',
+        };
+        return categoryMap[cat] || '#667187';
+    };
+
+    // Helper function to get category icon
+    const getCategoryIcon = (cat: string): string => {
+        const iconMap: { [key: string]: string } = {
+            'water issue': 'water-outline',
+            'electricity issue': 'flash-outline',
+            'garbage issue': 'trash-outline',
+            'other issues': 'ellipsis-horizontal-outline',
+        };
+        return iconMap[cat] || 'ellipsis-horizontal-outline';
+    };
+
+    // Success Screen
+    if (showSuccess && successTicketData) {
+        return (
+            <SafeAreaView style={styles.container} edges={['top']}>
+                <View style={styles.successScreenContainer}>
+                    <ScrollView
+                        contentContainerStyle={styles.successScrollContent}
+                        showsVerticalScrollIndicator={false}
+                    >
+                        {/* Success Icon */}
+                        <View style={styles.successIconContainer}>
+                            <Ionicons name="checkmark-circle" size={100} color="#10B981" />
+                        </View>
+
+                        {/* Success Messages */}
+                        <ThemedText style={styles.successTitle}>Ticket Raised.</ThemedText>
+                        <ThemedText style={styles.successSubtitle}>We will get back to you</ThemedText>
+
+                        {/* Ticket Info Card */}
+                        <View style={styles.ticketInfoCard}>
+                            {/* Ticket Header with Icon and Title */}
+                            <View style={styles.ticketInfoRow}>
+                                <View style={[
+                                    styles.ticketIconBg,
+                                    { backgroundColor: getCategoryColor(successTicketData.category) + '30' }
+                                ]}>
+                                    <Ionicons
+                                        name={getCategoryIcon(successTicketData.category) as any}
+                                        size={28}
+                                        color={getCategoryColor(successTicketData.category)}
+                                    />
+                                </View>
+                                <View style={styles.ticketTitleSection}>
+                                    <ThemedText style={styles.ticketTitle}>
+                                        {successTicketData.title}
+                                    </ThemedText>
+                                    <ThemedText style={styles.ticketLocation} numberOfLines={2}>
+                                        {successTicketData.address_text}
+                                    </ThemedText>
+                                </View>
+                            </View>
+
+                            {/* Divider */}
+                            <View style={styles.ticketDivider} />
+
+                            {/* Ticket Details */}
+                            <View style={styles.ticketDetailsSection}>
+                                {/* Status */}
+                                <View style={styles.ticketDetailRow}>
+                                    <ThemedText style={styles.ticketDetailLabel}>Status:</ThemedText>
+                                    <ThemedText style={[styles.ticketDetailValue, { color: '#10B981', fontWeight: '600' }]}>
+                                        Opened
+                                    </ThemedText>
+                                </View>
+
+                                {/* Last Updated */}
+                                <View style={styles.ticketDetailRow}>
+                                    <ThemedText style={styles.ticketDetailLabel}>Last Updated:</ThemedText>
+                                    <ThemedText style={styles.ticketDetailValue}>
+                                        {new Date(successTicketData.created_at).toLocaleTimeString('en-US', {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
+                                        })} | {new Date(successTicketData.created_at).toLocaleDateString('en-US', {
+                                            month: 'short',
+                                            day: '2-digit',
+                                            year: 'numeric'
+                                        })}
+                                    </ThemedText>
+                                </View>
+
+                                {/* Expected Resolution */}
+                                <View style={styles.ticketDetailRow}>
+                                    <ThemedText style={styles.ticketDetailLabel}>Expected resolution:</ThemedText>
+                                    <ThemedText style={styles.ticketDetailValue}>48 hours</ThemedText>
+                                </View>
+                            </View>
+                        </View>
+                    </ScrollView>
+
+                    {/* Back to Home Button */}
+                    <View style={styles.successButtonContainer}>
+                        <AuthButton
+                            title="Back to home"
+                            onPress={handleClose}
+                            style={{ backgroundColor: '#1F2937' }}
+                            textColor="#FFFFFF"
+                        />
+                    </View>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+
+
+    // Form Screen
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
-            {/* Success Card */}
-            {showSuccess && (
-                <View style={styles.successCard}>
-                    <Ionicons name="checkmark-circle" size={32} color="#10B981" style={{ marginBottom: 8 }} />
-                    <ThemedText style={styles.successText}>Ticket created successfully!</ThemedText>
-                </View>
-            )}
-
             {/* Header */}
             <View style={styles.header}>
                 <Pressable onPress={handleClose} style={styles.closeButton}>
-                    <Ionicons name="close" size={24} color="#1F2937" />
+                    <Ionicons name="chevron-back" size={24} color="#1F2937" />
                 </Pressable>
-                <ThemedText style={styles.headerTitle}>Report Issue</ThemedText>
+                <ThemedText style={styles.headerTitle}>
+                    {title || 'New Issue'}
+                </ThemedText>
                 <View style={styles.placeholder} />
             </View>
 
@@ -450,19 +588,6 @@ export default function CreateTicketScreen() {
                     keyboardShouldPersistTaps="handled"
                     showsVerticalScrollIndicator={false}
                 >
-                    {/* Progress Indicator */}
-                    <View style={styles.progressContainer}>
-                        <View style={styles.progressStep}>
-                            <View style={[styles.progressDot, styles.progressDotActive]} />
-                            <ThemedText style={styles.progressLabel}>Details</ThemedText>
-                        </View>
-                        <View style={styles.progressLine} />
-                        <View style={styles.progressStep}>
-                            <View style={styles.progressDot} />
-                            <ThemedText style={styles.progressLabel}>Review</ThemedText>
-                        </View>
-                    </View>
-
                     {error && (
                         <Alert
                             message={error}
@@ -471,53 +596,16 @@ export default function CreateTicketScreen() {
                         />
                     )}
 
-                    {/* Category Selection */}
-                    {/* <View style={styles.section}>
-                        <ThemedText style={styles.sectionTitle}>Select Category *</ThemedText>
-                        {errors.category && (
-                            <ThemedText style={styles.errorText}>{errors.category}</ThemedText>
-                        )}
-                        <View style={styles.categoriesGrid}>
-                            {CATEGORIES.map((cat) => (
-                                <Pressable
-                                    key={cat.id}
-                                    style={[
-                                        styles.categoryCard,
-                                        category === cat.id && styles.categoryCardSelected,
-                                    ]}
-                                    onPress={() => setCategory(cat.id)}
-                                >
-                                    <View
-                                        style={[
-                                            styles.categoryIcon,
-                                            { backgroundColor: cat.color + '20' },
-                                            category === cat.id && {
-                                                borderColor: cat.color,
-                                                borderWidth: 2,
-                                            },
-                                        ]}
-                                    >
-                                        <Ionicons name={cat.icon as any} size={22} color={cat.color} />
-                                    </View>
-                                    <ThemedText
-                                        style={[
-                                            styles.categoryLabel,
-                                            category === cat.id && { color: cat.color },
-                                        ]}
-                                        numberOfLines={1}
-                                    >
-                                        {cat.label}
-                                    </ThemedText>
-                                </Pressable>
-                            ))}
-                        </View>
-                    </View> */}
-
-                    {/* Category Header */}
-                    <View style={styles.categoryHeader}>
-                    <ThemedText style={styles.categoryTitle}>
-                        {category ? CATEGORIES.find(c => c.id === category)?.label : 'Select Category'}
-                    </ThemedText>
+                    {/* Category Dropdown */}
+                    <View style={styles.section}>
+                        <CategoryDropdown
+                            label="Category"
+                            placeholder="Select a category"
+                            value={category}
+                            onSelect={setCategory}
+                            categories={CATEGORIES}
+                            error={errors.category}
+                        />
                     </View>
 
                     {/* Title */}
@@ -532,17 +620,33 @@ export default function CreateTicketScreen() {
                         />
                     </View>
 
-                    {/* Description */}
-                    <View style={styles.section}>
+                    {/* Location Section */}
+                    <View style={styles.sectionWithHeader}>
+                        <ThemedText style={styles.sectionHeader}>Location Details</ThemedText>
+                        <View style={styles.sectionContent}>
+                            <LocationInput
+                                value={addressText}
+                                onLocationSelect={(address, latitude, longitude) => {
+                                    setAddressText(address);
+                                    setLat(latitude || null);
+                                    setLng(longitude || null);
+                                }}
+                                error={errors.address}
+                                placeholder="Search for address or landmark"
+                            />
+                        </View>
+                    </View>
+
+                    {/* Description Section */}
+                    <View style={styles.sectionWithHeader}>
                         <View style={styles.labelWithButton}>
-                            <ThemedText style={styles.label}>Description *</ThemedText>
+                            <ThemedText style={styles.sectionHeader}>Issue Description</ThemedText>
                             <Pressable 
                                 style={[
                                     styles.voiceButton,
                                     isListening && styles.voiceButtonActive
                                 ]}
                                 onPress={handleVoiceInput}
-                                //disabled={isListening}
                             >
                                 <Ionicons 
                                     name={isListening ? "stop-circle" : "mic-outline"} 
@@ -577,32 +681,10 @@ export default function CreateTicketScreen() {
                         </ThemedText>
                     </View>
 
-                    {/* Location */}
-                    <View style={styles.section}>
-                        <LocationInput
-                            value={addressText}
-                            onLocationSelect={(address, latitude, longitude) => {
-                                setAddressText(address);
-                                setLat(latitude || null);
-                                setLng(longitude || null);
-                            }}
-                            error={errors.address}
-                            placeholder="Search for address or landmark"
-                        />
-                    </View>
-
                     {/* Photo Upload */}
-                    <View style={styles.section}>
-                        <ThemedText style={styles.label}>
-                            Add Photos (Optional) {photos.length > 0 && `(${photos.length}/5)`}
-                            {classifyingImages && (
-                                <View style={{ marginLeft: 8, flexDirection: 'row', alignItems: 'center' }}>
-                                    <ActivityIndicator size="small" color="#6366F1" />
-                                    <ThemedText style={{ fontSize: 12, color: '#6366F1', marginLeft: 4 }}>
-                                        Analyzing image...
-                                    </ThemedText>
-                                </View>
-                            )}
+                    <View style={styles.sectionWithHeader}>
+                        <ThemedText style={styles.sectionHeader}>
+                            Add a photo (optional)
                         </ThemedText>
                         
                         {/* Photo Preview Grid */}
@@ -611,6 +693,15 @@ export default function CreateTicketScreen() {
                                 {photos.map((uri, index) => (
                                     <View key={index} style={styles.photoPreview}>
                                         <Image source={{ uri }} style={styles.photoImage} />
+                                        
+                                        {/* Small Analyzing Overlay */}
+                                        {analyzingImage && currentImageAnalyzing === uri && (
+                                            <View style={styles.analyzingOverlay}>
+                                                <ActivityIndicator size="small" color="#F59E0B" />
+                                                <ThemedText style={styles.analyzingOverlayText}>Analyzing...</ThemedText>
+                                            </View>
+                                        )}
+                                        
                                         <Pressable
                                             style={styles.removePhotoButton}
                                             onPress={() => handleRemovePhoto(index)}
@@ -630,22 +721,11 @@ export default function CreateTicketScreen() {
                                         styles.photoUploadButton,
                                         classifyingImages && { opacity: 0.6 }
                                     ]}
-                                    onPress={handleTakePhoto}
-                                    disabled={classifyingImages}
-                                >
-                                    <Ionicons name="camera-outline" size={28} color="#6366F1" />
-                                    <ThemedText style={styles.photoUploadText}>Take Photo</ThemedText>
-                                </Pressable>
-                                <Pressable 
-                                    style={[
-                                        styles.photoUploadButton,
-                                        classifyingImages && { opacity: 0.6 }
-                                    ]}
                                     onPress={handleSelectFromGallery}
                                     disabled={classifyingImages}
                                 >
-                                    <Ionicons name="images-outline" size={28} color="#6366F1" />
-                                    <ThemedText style={styles.photoUploadText}>Gallery</ThemedText>
+                                    <Ionicons name="images-outline" size={48} color="#9CA3AF" />
+                                    <ThemedText style={styles.photoUploadText}>Select Photos</ThemedText>
                                 </Pressable>
                             </View>
                         )}
@@ -654,11 +734,14 @@ export default function CreateTicketScreen() {
                     {/* Submit Button */}
                     <View style={styles.submitContainer}>
                         <AuthButton
-                            title="Submit Report"
+                            title="Send My Complaint"
                             onPress={handleSubmit}
                             loading={loading}
+                            style={{ backgroundColor: '#016ACD', flex: 1 }}
+                            textColor="#fff"
+                            
                         />
-                        <ThemedText style={styles.disclaimer}>
+                        <ThemedText style={[styles.disclaimer, { color: '#fff' }]}>
                             By submitting, you confirm that the information provided is accurate
                         </ThemedText>
                     </View>
@@ -700,7 +783,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
-        padding: 20,
+        padding: 24,
         paddingBottom: 40,
     },
     progressContainer: {
@@ -871,14 +954,26 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#E5E7EB',
         borderStyle: 'dashed',
-        paddingVertical: 24,
+        paddingVertical: 40,
         alignItems: 'center',
-        gap: 8,
+        gap: 12,
     },
     photoUploadText: {
-        fontSize: 13,
-        color: '#6366F1',
+        fontSize: 16,
+        color: '#9CA3AF',
         fontWeight: '500',
+    },
+    sectionWithHeader: {
+        marginBottom: 24,
+    },
+    sectionHeader: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#0866D8',
+        marginBottom: 12,
+    },
+    sectionContent: {
+        marginTop: 8,
     },
     submitContainer: {
         marginTop: 8,
@@ -915,5 +1010,160 @@ const styles = StyleSheet.create({
         color: '#10B981',
         fontWeight: '600',
         textAlign: 'center',
+    },
+    // Success Screen Styles
+    successScreenContainer: {
+        flex: 1,
+        backgroundColor: '#F5F5F5',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 20,
+    },
+    successScrollContent: {
+        paddingBottom: 20,
+    },
+    successIconContainer: {
+        alignItems: 'center',
+        marginTop: 40,
+        marginBottom: 20,
+    },
+    successTitle: {
+        fontSize: 32,
+        fontWeight: '700',
+        color: '#10B981',
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    successSubtitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#10B981',
+        textAlign: 'center',
+        marginBottom: 32,
+    },
+    ticketInfoCard: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 24,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    ticketInfoRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginBottom: 16,
+    },
+    ticketIconBg: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 14,
+        flexShrink: 0,
+    },
+    ticketTitleSection: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    ticketTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#1F2937',
+        marginBottom: 4,
+    },
+    ticketLocation: {
+        fontSize: 13,
+        color: '#6B7280',
+        lineHeight: 18,
+    },
+    ticketDivider: {
+        height: 1,
+        backgroundColor: '#E5E7EB',
+        marginVertical: 12,
+    },
+    ticketDetailsSection: {
+        gap: 12,
+    },
+    ticketDetailRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    ticketDetailLabel: {
+        fontSize: 13,
+        color: '#6B7280',
+        fontWeight: '500',
+    },
+    ticketDetailValue: {
+        fontSize: 13,
+        color: '#1F2937',
+        fontWeight: '500',
+    },
+    successButtonContainer: {
+        paddingBottom: 16,
+    },
+    // Analyzing Overlay Styles (Small)
+    analyzingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
+    },
+    analyzingOverlayText: {
+        fontSize: 12,
+        color: '#FFFFFF',
+        fontWeight: '500',
+    },
+    // Analyzing Image Screen Styles (Removed - now using small overlay)
+    analyzingScreenContainer: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 24,
+    },
+    analyzingImagePreview: {
+        width: 280,
+        height: 280,
+        borderRadius: 16,
+        overflow: 'hidden',
+        marginBottom: 40,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    analyzingImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    analyzingContent: {
+        alignItems: 'center',
+        gap: 12,
+    },
+    analyzingTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#1F2937',
+        textAlign: 'center',
+    },
+    analyzingSubtitle: {
+        fontSize: 14,
+        color: '#6B7280',
+        textAlign: 'center',
+        lineHeight: 20,
     },
 });
