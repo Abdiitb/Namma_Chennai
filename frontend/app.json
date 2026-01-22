@@ -45,7 +45,41 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "name": "Namma Chennai",
+      "shortName": "Namma Chennai",
+      "description": "Your gateway to city services and information",
+      "lang": "en",
+      "scope": "/",
+      "display": "standalone",
+      "orientation": "portrait",
+      "themeColor": "#2174D4",
+      "backgroundColor": "#FAFAFA",
+      "startUrl": "/",
+      "manifest": {
+        "name": "Namma Chennai",
+        "short_name": "Namma Chennai",
+        "description": "Your gateway to city services and information",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#FAFAFA",
+        "theme_color": "#2174D4",
+        "orientation": "portrait",
+        "icons": [
+          {
+            "src": "./assets/images/icon.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+          },
+          {
+            "src": "./assets/images/icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+          }
+        ]
+      }
     },
     "plugins": [
       "expo-router",
