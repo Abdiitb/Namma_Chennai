@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView, Pressable, Image, TextInput } from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable, Image, TextInput, ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { Ionicons } from '@expo/vector-icons';
@@ -122,13 +122,18 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Welcome Card */}
-        <View style={styles.welcomeCard}>
-          <Ionicons name="home" size={48} color="#016ACD" />
-          <ThemedText style={styles.welcomeTitle}>Welcome to Namma Chennai</ThemedText>
-          <ThemedText style={styles.welcomeSubtitle}>
-            Your gateway to city services and information
-          </ThemedText>
-        </View>
+        <ImageBackground 
+          source={require('@/assets/images/26045d6fec840ea9852a622a9275fb6e73aca097.png')}
+          style={styles.welcomeCard}
+          imageStyle={styles.welcomeCardImage}
+        >
+          <View style={styles.welcomeCardContent}>
+            <ThemedText style={styles.welcomeTitle}>Welcome to Namma Chennai</ThemedText>
+            <ThemedText style={styles.welcomeSubtitle}>
+              Your gateway to city services and information
+            </ThemedText>
+          </View>
+        </ImageBackground>
 
         {/* Quick Actions */}
         <View style={styles.section}>
@@ -350,28 +355,40 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   welcomeCard: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 24,
-    alignItems: 'center',
     marginBottom: 24,
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    aspectRatio: 16 / 9,
+    justifyContent: 'flex-end',
+  },
+  welcomeCardImage: {
+    resizeMode: 'contain',
+  },
+  welcomeCardContent: {
+    padding: 24,
+    paddingBottom: 32,
   },
   welcomeTitle: {
     fontSize: 22,
     fontWeight: '700',
-    color: '#000000',
-    marginTop: 16,
+    color: '#FFFFFF',
     marginBottom: 8,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   welcomeSubtitle: {
     fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
+    color: '#FFFFFF',
+    textAlign: 'left',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   section: {
     paddingHorizontal: 16,

@@ -46,6 +46,7 @@
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png",
+      "title": "Namma Chennai",
       "name": "Namma Chennai",
       "shortName": "Namma Chennai",
       "description": "Your gateway to city services and information",
