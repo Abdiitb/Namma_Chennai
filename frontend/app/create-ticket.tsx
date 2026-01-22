@@ -444,7 +444,7 @@ export default function CreateTicketScreen() {
     };
 
     const handleClose = () => {
-        router.replace('/');
+        router.replace('/issues');
     };
 
     // Helper function to get category color

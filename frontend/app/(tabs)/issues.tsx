@@ -70,11 +70,6 @@ export default function TicketsScreen() {
   console.log('Fetched tickets:', tickets);
 
   const filteredTickets = tickets.filter(ticket => {
-    if (selectedTab === 'All') return true;
-    // return getStatusLabel(ticket.status) === selectedTab.toLowerCase().replace(' ', '_');
-    if (selectedTab === 'Open') return ticket.status === 'open';
-    if (selectedTab === 'Assigned') return ticket.status === 'in_progress' || ticket.status === 'assigned';
-    if (selectedTab === 'Completed') return ticket.status === 'resolved';
     return true;
   });
 
@@ -88,7 +83,7 @@ export default function TicketsScreen() {
       </View>
 
       {/* Scrollable Tabs */}
-      <View style={styles.tabsWrapper}>
+      {/* <View style={styles.tabsWrapper}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -120,7 +115,7 @@ export default function TicketsScreen() {
             </Pressable>
           ))}
         </ScrollView>
-      </View>
+      </View> */}
 
       {/* Tickets List */}
       <ScrollView 
@@ -197,13 +192,15 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#333333',
+    backgroundColor: '#FFFFFF',
     paddingTop: 12,
+    alignItems: 'center',
+
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FFFFFF',
+    color: '#14171F',
   },
   tabsWrapper: {
     backgroundColor: '#FFFFFF',
