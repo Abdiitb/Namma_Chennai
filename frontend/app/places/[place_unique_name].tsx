@@ -30,7 +30,7 @@ export const PLACES_DATA: Record<string, {
     title: 'Rippon Building',
     unique_name: 'rippon-building',
     image: require('@/assets/images/a4d85bf7b4201ba079e7d0088dfce906c968b21c.png'),
-    description: 'Iconic white limestone structure in Chennai that houses the Greater Chennai Corporation. A landmark building with rich historical significance.',
+    description: 'Registration for Heritage Walk at Ripon Buildings\n\nGreater Chennai Corporation (GCC) invites you to a walking tour of the historic Ripon Buildings and its campus.',
     address: 'Periamet, Kannappar Thidal, Poongavanapuram, Chennai - 600003',
     hours: '10:00 AM - 06:00 PM',
     amenities: ['Parking', 'Access', 'Photos', 'Restroom'],
@@ -43,6 +43,28 @@ const AMENITY_ICONS: Record<string, { icon: keyof typeof Ionicons.glyphMap; colo
   'Photos': { icon: 'camera-outline', color: '#6B7280' },
   'Restroom': { icon: 'water-outline', color: '#6B7280' },
 };
+
+function HeritageWalkSchedule() {
+  return (
+    <View style={styles.heritageWalkSection}>
+      <ThemedText style={styles.heritageWalkTitle}>Heritage Walk Schedule</ThemedText>
+      <View style={styles.heritageWalkInfo}>
+        <View style={styles.heritageWalkRow}>
+          <Ionicons name="calendar-outline" size={20} color="#1F2937" />
+          <ThemedText style={styles.heritageWalkText}>
+            Available days: Tuesday, Thursday, Saturday, and Sunday
+          </ThemedText>
+        </View>
+        <View style={styles.heritageWalkRow}>
+          <Ionicons name="time-outline" size={20} color="#1F2937" />
+          <ThemedText style={styles.heritageWalkText}>
+            Time slot: 8:00 AM to 9:00 AM
+          </ThemedText>
+        </View>
+      </View>
+    </View>
+  );
+}
 
 export default function PlaceDetailsScreen() {
   const params = useLocalSearchParams();
@@ -89,6 +111,9 @@ export default function PlaceDetailsScreen() {
         <View style={styles.infoCard}>
           <ThemedText style={styles.placeTitle}>{place.title}</ThemedText>
           <ThemedText style={styles.descriptionText}>{place.description}</ThemedText>
+
+          {/* Heritage Walk Information - Only for Ripon Building */}
+          {placeUniqueName === 'rippon-building' && <HeritageWalkSchedule />}
 
           {/* Location */}
           <View style={styles.infoRow}>
@@ -210,6 +235,34 @@ const styles = StyleSheet.create({
     color: '#4B5563',
     lineHeight: 22,
     marginBottom: 24,
+  },
+  heritageWalkSection: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  heritageWalkTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+    marginBottom: 12,
+  },
+  heritageWalkInfo: {
+    gap: 12,
+  },
+  heritageWalkRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  heritageWalkText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#1F2937',
+    lineHeight: 20,
   },
   infoRow: {
     flexDirection: 'row',

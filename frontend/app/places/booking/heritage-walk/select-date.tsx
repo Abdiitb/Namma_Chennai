@@ -10,7 +10,7 @@ type VisitorCategory = 'individual' | 'family' | 'school' | 'college';
 
 const MAX_BOOKINGS_PER_DAY = 150;
 
-// Get next available Tuesday, Thursday, and Saturday dates
+// Get next available Tuesday, Thursday, Saturday, and Sunday dates
 function getAvailableDates(): Date[] {
   const dates: Date[] = [];
   const today = new Date();
@@ -21,8 +21,8 @@ function getAvailableDates(): Date[] {
     date.setDate(today.getDate() + i);
     const dayOfWeek = date.getDay();
     
-    // Tuesday = 2, Thursday = 4, Saturday = 6
-    if (dayOfWeek === 2 || dayOfWeek === 4 || dayOfWeek === 6) {
+    // Sunday = 0, Tuesday = 2, Thursday = 4, Saturday = 6
+    if (dayOfWeek === 0 || dayOfWeek === 2 || dayOfWeek === 4 || dayOfWeek === 6) {
       dates.push(date);
     }
   }
@@ -132,10 +132,10 @@ export default function SelectDateScreen() {
         showsVerticalScrollIndicator={false}
       >
         <ThemedText style={styles.subtitle}>
-          Available days: Tuesday, Thursday, Saturday
+          Available days: Tuesday, Thursday, Saturday, and Sunday
         </ThemedText>
         <ThemedText style={styles.timeSlotInfo}>
-          Time slot: 08:00 AM - 09:00 AM (Fixed)
+          Time slot: 8:00 AM to 9:00 AM (Fixed)
         </ThemedText>
 
         <View style={styles.datesContainer}>
