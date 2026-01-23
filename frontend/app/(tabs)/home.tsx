@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView, Pressable, Image, TextInput, ImageBackground } from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable, Image, TextInput, ImageBackground, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { Ionicons } from '@expo/vector-icons';
@@ -48,6 +48,10 @@ const PLACES = [
 export default function HomeScreen() {
   const { user } = useAuth();
   const { language, toggleLanguage } = useLanguage();
+  const { width: screenWidth } = useWindowDimensions();
+  // Account for container padding (16px on each side)
+  const cardWidth = screenWidth - 32;
+  const welcomeCardHeight = (cardWidth * 9) / 16; // 16:9 aspect ratio
 
   const handleQuickAction = (actionId: string) => {
     if (actionId === '1') {
@@ -124,7 +128,7 @@ export default function HomeScreen() {
         {/* Welcome Card */}
         <ImageBackground 
           source={require('@/assets/images/26045d6fec840ea9852a622a9275fb6e73aca097.png')}
-          style={styles.welcomeCard}
+          style={[styles.welcomeCard, { width: cardWidth, height: welcomeCardHeight }]}
           imageStyle={styles.welcomeCardImage}
         >
           <View style={styles.welcomeCardContent}>
@@ -363,11 +367,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-    aspectRatio: 16 / 9,
     justifyContent: 'flex-end',
   },
   welcomeCardImage: {
     resizeMode: 'contain',
+    width: '100%',
+    height: '100%',
   },
   welcomeCardContent: {
     padding: 24,

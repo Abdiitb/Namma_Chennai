@@ -8,6 +8,7 @@ import { ZeroProvider } from '@rocicorp/zero/react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
+import { useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 import { schema } from '@/zero/schema';
@@ -33,6 +34,13 @@ export default function RootLayout() {
 
 function InnerRootLayout() {
   const { user } = useAuth();
+  
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      document.title = 'Namma Chennai';
+    }
+  }, []);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: ThemeColors.background }} edges={['top', 'left', 'right', 'bottom']}>
       <ZeroProvider
