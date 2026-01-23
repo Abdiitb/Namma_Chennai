@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 
 // API base URL - uses localhost for web, machine IP for native devices
-export const API_BASE_URL = Platform.OS === 'web' 
+export const API_BASE_URL = Platform.OS === 'web' && typeof window !== 'undefined'
   ? window.location.protocol + '//' + window.location.hostname + ':3000' 
   : 'http://namma-chennai.app.seekshiva.in:3000';
 
