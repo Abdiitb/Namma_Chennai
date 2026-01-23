@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView, Pressable, Dimensions } from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable, Dimensions, Image } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
@@ -120,7 +120,10 @@ export default function TicketsScreen() {
       {/* Tickets List */}
       <ScrollView 
         style={styles.ticketsList}
-        contentContainerStyle={styles.ticketsContent}
+        contentContainerStyle={[
+          styles.ticketsContent,
+          filteredTickets.length === 0 && styles.ticketsContentEmpty
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {filteredTickets.map((ticket) => (
@@ -165,21 +168,38 @@ export default function TicketsScreen() {
 
         {filteredTickets.length === 0 && (
           <View style={styles.emptyState}>
-            <Ionicons name="receipt-outline" size={48} color="#D1D5DB" />
-            <ThemedText style={styles.emptyText}>No tickets found</ThemedText>
+            <Image 
+              source={require('@/assets/images/8ac415e50ea01982fbab8a7e1eee38071b4a8eec.png')} 
+              style={styles.emptyStateImage}
+              resizeMode="contain"
+            />
+            <ThemedText style={styles.emptyStateTitle}>No Open Grievances</ThemedText>
+            <ThemedText style={styles.emptyStateSubtitle}>
+              You don't have any active complaints right now. If you see something that needs attention,
+            </ThemedText>
+            <Pressable 
+              style={styles.raiseIssueButton}
+              onPress={() => {
+                router.push('/create-ticket');
+              }}
+            >
+              <ThemedText style={styles.raiseIssueButtonText}>Raise an Issue</ThemedText>
+            </Pressable>
           </View>
         )}
       </ScrollView>
 
-      {/* FAB */}
-      <Pressable 
-        style={styles.fab}
-        onPress={() => {
-          router.push('/create-ticket');
-        }}
-      >
-        <Ionicons name="add" size={28} color="#000000" />
-      </Pressable>
+      {/* FAB - Only show when there are tickets */}
+      {filteredTickets.length > 0 && (
+        <Pressable 
+          style={styles.fab}
+          onPress={() => {
+            router.push('/create-ticket');
+          }}
+        >
+          <Ionicons name="add" size={28} color="#000000" />
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -248,6 +268,10 @@ const styles = StyleSheet.create({
   ticketsContent: {
     padding: 16,
     paddingBottom: 100,
+  },
+  ticketsContentEmpty: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   ticketCard: {
     backgroundColor: '#FFFFFF',
@@ -325,12 +349,49 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 32,
     paddingVertical: 60,
+    minHeight: 400,
   },
-  emptyText: {
-    fontSize: 16,
+  emptyStateImage: {
+    width: '100%',
+    maxWidth: 350,
+    height: 250,
+    marginBottom: 32,
+  },
+  emptyStateTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000000',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  emptyStateSubtitle: {
+    fontSize: 14,
     color: '#6B7280',
-    marginTop: 12,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+    paddingHorizontal: 16,
+  },
+  raiseIssueButton: {
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 24,
+    minWidth: 160,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  raiseIssueButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
   },
   fab: {
     position: 'absolute',
