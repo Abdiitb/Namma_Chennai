@@ -128,10 +128,19 @@ export default function PlaceDetailsScreen() {
           <Pressable
             style={styles.bookButton}
             onPress={() => {
-              router.push({
-                pathname: '/places/booking/select-guests',
-                params: { place_unique_name: placeUniqueName },
-              });
+              // Route to Heritage Walk booking flow for Rippon Building
+              if (placeUniqueName === 'rippon-building') {
+                router.push({
+                  pathname: '/places/booking/heritage-walk/category-selection',
+                  params: { place_unique_name: placeUniqueName },
+                });
+              } else {
+                // Use regular booking flow for other places
+                router.push({
+                  pathname: '/places/booking/select-guests',
+                  params: { place_unique_name: placeUniqueName },
+                });
+              }
             }}
           >
             <ThemedText style={styles.bookButtonText}>Book Entry Tickets</ThemedText>

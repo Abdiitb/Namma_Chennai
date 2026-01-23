@@ -37,6 +37,7 @@ app.use(helmet());
 app.use(cors());
 app.use(morgan('combined'));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // For form-urlencoded requests
 
 // Auth endpoint
 app.post('/auth/login', async (req, res) => {
@@ -248,6 +249,181 @@ app.post('/api/ai/classify-image', async (req, res) => {
   } catch (error) {
     console.error('AI Classification error:', error);
     res.status(500).json({ error: 'Failed to process image with AI' });
+  }
+});
+
+// Heritage Walk API Proxy Endpoints
+const HERITAGE_WALK_BASE_URL = 'https://gccservices.in/heritagewalk';
+
+// Get booking details by reference ID
+app.get('/api/heritage-walk/booking-details', async (req, res) => {
+  try {
+    const { refId } = req.query;
+    if (!refId) {
+      return res.status(400).json({ error: 'refId is required' });
+    }
+
+    const response = await fetch(
+      `${HERITAGE_WALK_BASE_URL}/registration/api/bookingdetails?refId=${refId}`
+    );
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Heritage Walk proxy error:', error);
+    res.status(500).json({ error: 'Failed to fetch booking details' });
+  }
+});
+
+// Get booking list by mobile number
+app.get('/api/heritage-walk/booking-list', async (req, res) => {
+  try {
+    const { mobileno } = req.query;
+    if (!mobileno) {
+      return res.status(400).json({ error: 'mobileno is required' });
+    }
+
+    const response = await fetch(
+      `${HERITAGE_WALK_BASE_URL}/registration/api/getlist?mobileno=${mobileno}`
+    );
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Heritage Walk proxy error:', error);
+    res.status(500).json({ error: 'Failed to fetch booking list' });
+  }
+});
+
+// Get all booking counts
+app.get('/api/heritage-walk/booking-counts', async (req, res) => {
+  try {
+    const response = await fetch(
+      `${HERITAGE_WALK_BASE_URL}/registration/api/getAllBookingCounts`
+    );
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Heritage Walk proxy error:', error);
+    res.status(500).json({ error: 'Failed to fetch booking counts' });
+  }
+});
+
+// Save individual registration
+app.post('/api/heritage-walk/save-individual', async (req, res) => {
+  try {
+    const formData = new URLSearchParams();
+    Object.keys(req.body).forEach(key => {
+      formData.append(key, req.body[key]);
+    });
+
+    const response = await fetch(
+      `${HERITAGE_WALK_BASE_URL}/registration/api/saveIndividualRegistration`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      }
+    );
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Heritage Walk proxy error:', error);
+    res.status(500).json({ error: 'Failed to save individual registration' });
+  }
+});
+
+// Save family registration
+app.post('/api/heritage-walk/save-family', async (req, res) => {
+  try {
+    const formData = new URLSearchParams();
+    Object.keys(req.body).forEach(key => {
+      formData.append(key, req.body[key]);
+    });
+
+    const response = await fetch(
+      `${HERITAGE_WALK_BASE_URL}/registration/api/saveFamilyRegistration`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      }
+    );
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Heritage Walk proxy error:', error);
+    res.status(500).json({ error: 'Failed to save family registration' });
+  }
+});
+
+// Save school registration
+app.post('/api/heritage-walk/save-school', async (req, res) => {
+  try {
+    const formData = new URLSearchParams();
+    Object.keys(req.body).forEach(key => {
+      formData.append(key, req.body[key]);
+    });
+
+    const response = await fetch(
+      `${HERITAGE_WALK_BASE_URL}/registration/api/saveSchoolRegistration`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      }
+    );
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Heritage Walk proxy error:', error);
+    res.status(500).json({ error: 'Failed to save school registration' });
+  }
+});
+
+// Save college registration
+app.post('/api/heritage-walk/save-college', async (req, res) => {
+  try {
+    const formData = new URLSearchParams();
+    Object.keys(req.body).forEach(key => {
+      formData.append(key, req.body[key]);
+    });
+
+    const response = await fetch(
+      `${HERITAGE_WALK_BASE_URL}/registration/api/saveCollegeRegistration`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString(),
+      }
+    );
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('Heritage Walk proxy error:', error);
+    res.status(500).json({ error: 'Failed to save college registration' });
+  }
+});
+
+// Get PDF download URL (returns URL, doesn't proxy the actual PDF)
+app.get('/api/heritage-walk/pdf-url', async (req, res) => {
+  try {
+    const { ID } = req.query;
+    if (!ID) {
+      return res.status(400).json({ error: 'ID is required' });
+    }
+
+    const pdfUrl = `${HERITAGE_WALK_BASE_URL}/api/pdf/download?ID=${ID}`;
+    res.json({ url: pdfUrl });
+  } catch (error) {
+    console.error('Heritage Walk proxy error:', error);
+    res.status(500).json({ error: 'Failed to generate PDF URL' });
   }
 });
 
