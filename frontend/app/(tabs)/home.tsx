@@ -53,9 +53,9 @@ export default function HomeScreen() {
     if (actionId === '1') {
       router.push('/create-ticket');
     } else if (actionId === '2') {
-      router.push('/services/pay-taxes');
+      router.push('/services/property-tax');
     } else if (actionId === '3') {
-      router.push('/services/get-documents');
+      router.push('/services/birth-and-death');
     } else {
       router.push('/(tabs)/services');
     }

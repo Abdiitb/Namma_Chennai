@@ -102,10 +102,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="services"
         options={{
-          title: 'Other Services',
+          title: 'Services',
           tabBarLabel: ({ color, focused }) => (
             <Text style={{ color: focused ? '#000000' : '#9CA3AF', fontSize: 11, fontWeight: '500', marginTop: 2 }}>
-              Other Services
+              Services
             </Text>
           ),
           tabBarIcon: ({ color, focused }) => (

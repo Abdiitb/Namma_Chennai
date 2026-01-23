@@ -3,23 +3,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { GCC_ONLINE_SERVICES } from '@/constants/gcc-online-services';
 
 export default function ServicesScreen() {
-  const services = [
-    { icon: 'cash-outline', name: 'Pay Tax Dues', description: 'Property, Water & Vehicle Tax', color: '#F59E0B', route: '/services/pay-taxes' },
-    { icon: 'document-outline', name: 'Get Documents', description: 'Certificates & Records', color: '#06B6D4', route: '/services/get-documents' },
-    { icon: 'water-outline', name: 'Water Supply', description: 'Billing & Connections', color: '#06B6D4' },
-    { icon: 'flash-outline', name: 'Electricity', description: 'Power & Utilities', color: '#F59E0B' },
-    { icon: 'trash-outline', name: 'Waste Management', description: 'Collection & Disposal', color: '#EC4899' },
-    { icon: 'car-outline', name: 'Transport', description: 'Public Transit & Routes', color: '#8B5CF6' },
-    { icon: 'school-outline', name: 'Education', description: 'Schools & Programs', color: '#10B981' },
-    { icon: 'medical-outline', name: 'Healthcare', description: 'Hospitals & Clinics', color: '#EF4444' },
-  ];
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <ThemedText style={styles.headerTitle}>Other Services</ThemedText>
+        <ThemedText style={styles.headerTitle}>Online Services</ThemedText>
       </View>
       
       <ScrollView 
@@ -29,39 +19,28 @@ export default function ServicesScreen() {
       >
         <View style={styles.infoCard}>
           <Ionicons name="grid" size={48} color="#016ACD" />
-          <ThemedText style={styles.infoTitle}>City Services</ThemedText>
+          <ThemedText style={styles.infoTitle}>Greater Chennai Corporation</ThemedText>
           <ThemedText style={styles.infoSubtitle}>
-            Access various municipal services and information
+            Browse online services and modules
           </ThemedText>
         </View>
 
         <View style={styles.servicesGrid}>
-          {services.map((service, index) => {
-            const ServiceWrapper = service.route ? Pressable : View;
-            const wrapperProps = service.route ? {
-              onPress: () => router.push(service.route!),
-              style: styles.serviceCard,
-            } : {
-              style: styles.serviceCard,
-            };
-            
+          {GCC_ONLINE_SERVICES.map((service, index) => {
             return (
-              <ServiceWrapper key={index} {...wrapperProps}>
+              <Pressable
+                key={index}
+                style={styles.serviceCard}
+                onPress={() => router.push(`/services/${service.slug}`)}
+              >
                 <View style={[styles.serviceIconContainer, { backgroundColor: `${service.color}20` }]}>
                   <Ionicons name={service.icon as any} size={32} color={service.color} />
                 </View>
-                <ThemedText style={styles.serviceName}>{service.name}</ThemedText>
+                <ThemedText style={styles.serviceName}>{service.title}</ThemedText>
                 <ThemedText style={styles.serviceDescription}>{service.description}</ThemedText>
-              </ServiceWrapper>
+              </Pressable>
             );
           })}
-        </View>
-
-        <View style={styles.noteCard}>
-          <Ionicons name="information-circle-outline" size={24} color="#6B7280" />
-          <ThemedText style={styles.noteText}>
-            This is a temporary services screen. Full service catalog will be available soon.
-          </ThemedText>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -153,19 +132,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     textAlign: 'center',
-  },
-  noteCard: {
-    backgroundColor: '#F3F4F6',
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  noteText: {
-    flex: 1,
-    fontSize: 13,
-    color: '#6B7280',
-    lineHeight: 18,
   },
 });
