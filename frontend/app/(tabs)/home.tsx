@@ -49,8 +49,8 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const { language, toggleLanguage } = useLanguage();
   const { width: screenWidth } = useWindowDimensions();
-  // Account for container padding (16px on each side)
-  const cardWidth = screenWidth - 32;
+  // Account for container padding (16px on each side) and max-width of 600px
+  const cardWidth = Math.min(screenWidth - 32, 600);
   const welcomeCardHeight = (cardWidth * 9) / 16; // 16:9 aspect ratio
 
   const handleQuickAction = (actionId: string) => {
@@ -126,18 +126,20 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Welcome Card */}
-        <ImageBackground 
-          source={require('@/assets/images/26045d6fec840ea9852a622a9275fb6e73aca097.png')}
-          style={[styles.welcomeCard, { width: cardWidth, height: welcomeCardHeight }]}
-          imageStyle={styles.welcomeCardImage}
-        >
-          <View style={styles.welcomeCardContent}>
-            <ThemedText style={styles.welcomeTitle}>Welcome to Namma Chennai</ThemedText>
-            <ThemedText style={styles.welcomeSubtitle}>
-              Your gateway to city services and information
-            </ThemedText>
-          </View>
-        </ImageBackground>
+        <View style={styles.welcomeCardContainer}>
+          <ImageBackground 
+            source={require('@/assets/images/26045d6fec840ea9852a622a9275fb6e73aca097.png')}
+            style={[styles.welcomeCard, { width: cardWidth, height: welcomeCardHeight }]}
+            imageStyle={styles.welcomeCardImage}
+          >
+            <View style={styles.welcomeCardContent}>
+              <ThemedText style={styles.welcomeTitle}>Welcome to Namma Chennai</ThemedText>
+              <ThemedText style={styles.welcomeSubtitle}>
+                Your gateway to city services and information
+              </ThemedText>
+            </View>
+          </ImageBackground>
+        </View>
 
         {/* Quick Actions */}
         <View style={styles.section}>
@@ -358,9 +360,12 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 24,
   },
+  welcomeCardContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
   welcomeCard: {
     borderRadius: 16,
-    marginBottom: 24,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -370,7 +375,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   welcomeCardImage: {
-    resizeMode: 'contain',
+    resizeMode: 'cover',
     width: '100%',
     height: '100%',
   },
