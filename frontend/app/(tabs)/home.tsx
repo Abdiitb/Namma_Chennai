@@ -8,9 +8,10 @@ import { useLanguage } from '@/context/language-context';
 
 const QUICK_ACTIONS = [
   { id: '1', title: 'Raise a\nComplaint', icon: 'ticket-outline' as const, color: '#EC4899' },
-  { id: '2', title: 'Pay\nTax dues', icon: 'cash-outline' as const, color: '#F59E0B' },
-  { id: '3', title: 'Get\nDocuments', icon: 'document-outline' as const, color: '#06B6D4' },
-  { id: '4', title: 'More\nServices', icon: 'apps-outline' as const, color: '#8B5CF6' },
+  { id: '2', title: 'Public\nGrievance', icon: 'document-text-outline' as const, color: '#016ACD' },
+  { id: '3', title: 'Pay\nTax dues', icon: 'cash-outline' as const, color: '#F59E0B' },
+  { id: '4', title: 'Get\nDocuments', icon: 'document-outline' as const, color: '#06B6D4' },
+  { id: '5', title: 'More\nServices', icon: 'apps-outline' as const, color: '#8B5CF6' },
 ];
 
 const EVENTS = [
@@ -57,8 +58,10 @@ export default function HomeScreen() {
     if (actionId === '1') {
       router.push('/create-ticket');
     } else if (actionId === '2') {
-      router.push('/services/property-tax');
+      router.push('/public-grievance/register-complaint/personal-details');
     } else if (actionId === '3') {
+      router.push('/services/property-tax');
+    } else if (actionId === '4') {
       router.push('/services/birth-and-death');
     } else {
       router.push('/(tabs)/services');

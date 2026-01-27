@@ -72,7 +72,14 @@ export default function ServiceDetailScreen() {
               <Pressable
                 key={m.slug}
                 style={styles.moduleCard}
-                onPress={() => router.push(`/services/${service.slug}/${m.slug}`)}
+                onPress={() => {
+                  // Special handling for Public Grievance - route to app flow instead of module page
+                  if (service.slug === 'public-grievance-redressal' && m.slug === 'register-complaint') {
+                    router.push('/public-grievance/register-complaint/personal-details');
+                  } else {
+                    router.push(`/services/${service.slug}/${m.slug}`);
+                  }
+                }}
               >
                 <ThemedText style={styles.moduleTitle}>{m.title}</ThemedText>
               </Pressable>

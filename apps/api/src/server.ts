@@ -427,6 +427,182 @@ app.get('/api/heritage-walk/pdf-url', async (req, res) => {
   }
 });
 
+// PGR API Proxy Endpoints
+const PGR_BASE_URL = 'https://gccservices.in/pgr/api';
+const GIS_BASE_URL = 'https://gisgccservices.in/agserver/rest/services/EDP_MOBILE_API/EDPAPI/FeatureServer/0/query';
+
+// Get all complaint categories
+app.get('/api/pgr/getComplaintCategories', async (req, res) => {
+  try {
+    const response = await fetch(`${PGR_BASE_URL}/getComplaintCategories`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: 'Failed to fetch categories' });
+    }
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('PGR proxy error:', error);
+    res.status(500).json({ error: 'Failed to fetch complaint categories' });
+  }
+});
+
+// Get complaint sub-types for a specific group
+app.get('/api/pgr/getComplaintSubTypes', async (req, res) => {
+  try {
+    const { groupId } = req.query;
+    if (!groupId) {
+      return res.status(400).json({ error: 'groupId is required' });
+    }
+
+    const response = await fetch(`${PGR_BASE_URL}/getComplaintSubTypes?groupId=${groupId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: 'Failed to fetch sub-types' });
+    }
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('PGR proxy error:', error);
+    res.status(500).json({ error: 'Failed to fetch complaint sub-types' });
+  }
+});
+
+// Get location details from GIS API
+app.get('/api/pgr/getLocationDetails', async (req, res) => {
+  try {
+    const { geometry, geometryType, inSR, defaultSR, spatialRel, distance, units, outFields, returnGeometry, f } = req.query;
+
+    if (!geometry) {
+      return res.status(400).json({ error: 'geometry is required' });
+    }
+
+    // Helper to convert query param to string
+    const toString = (val: any): string => {
+      if (Array.isArray(val)) return val[0] || '';
+      return String(val || '');
+    };
+
+    const params = new URLSearchParams();
+    params.append('where', toString(req.query.where));
+    params.append('objectIds', toString(req.query.objectIds));
+    params.append('time', toString(req.query.time));
+    params.append('geometry', toString(geometry));
+    params.append('geometryType', toString(geometryType) || 'esriGeometryPoint');
+    params.append('inSR', toString(inSR) || '4326');
+    params.append('defaultSR', toString(defaultSR) || '4326');
+    params.append('spatialRel', toString(spatialRel) || 'esriSpatialRelIntersects');
+    params.append('distance', toString(distance) || '25');
+    params.append('units', toString(units) || 'esriSRUnit_Meter');
+    params.append('relationParam', toString(req.query.relationParam));
+    params.append('outFields', toString(outFields) || 'region,new_zone,new_ward,road_id,road_name,gis_id,type');
+    params.append('returnGeometry', toString(returnGeometry) || 'false');
+    params.append('maxAllowableOffset', toString(req.query.maxAllowableOffset));
+    params.append('geometryPrecision', toString(req.query.geometryPrecision));
+    params.append('outSR', toString(req.query.outSR));
+    params.append('havingClause', toString(req.query.havingClause));
+    params.append('gdbVersion', toString(req.query.gdbVersion));
+    params.append('historicMoment', toString(req.query.historicMoment));
+    params.append('returnDistinctValues', toString(req.query.returnDistinctValues) || 'false');
+    params.append('returnIdsOnly', toString(req.query.returnIdsOnly) || 'false');
+    params.append('returnCountOnly', toString(req.query.returnCountOnly) || 'false');
+    params.append('returnExtentOnly', toString(req.query.returnExtentOnly) || 'false');
+    params.append('orderByFields', toString(req.query.orderByFields));
+    params.append('groupByFieldsForStatistics', toString(req.query.groupByFieldsForStatistics));
+    params.append('outStatistics', toString(req.query.outStatistics));
+    params.append('returnZ', toString(req.query.returnZ) || 'false');
+    params.append('returnM', toString(req.query.returnM) || 'false');
+    params.append('multipatchOption', toString(req.query.multipatchOption) || 'xyFootprint');
+    params.append('resultOffset', toString(req.query.resultOffset));
+    params.append('resultRecordCount', toString(req.query.resultRecordCount));
+    params.append('returnTrueCurves', toString(req.query.returnTrueCurves) || 'false');
+    params.append('returnExceededLimitFeatures', toString(req.query.returnExceededLimitFeatures) || 'false');
+    params.append('quantizationParameters', toString(req.query.quantizationParameters));
+    params.append('returnCentroid', toString(req.query.returnCentroid) || 'false');
+    params.append('timeReferenceUnknownClient', toString(req.query.timeReferenceUnknownClient) || 'false');
+    params.append('maxRecordCountFactor', toString(req.query.maxRecordCountFactor));
+    params.append('sqlFormat', toString(req.query.sqlFormat) || 'none');
+    params.append('resultType', toString(req.query.resultType));
+    params.append('featureEncoding', toString(req.query.featureEncoding) || 'esriDefault');
+    params.append('datumTransformation', toString(req.query.datumTransformation));
+    params.append('f', toString(f) || 'geojson');
+
+    const response = await fetch(`${GIS_BASE_URL}?${params.toString()}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: 'Failed to fetch location details' });
+    }
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('PGR proxy error:', error);
+    res.status(500).json({ error: 'Failed to fetch location details' });
+  }
+});
+
+// Register a complaint
+app.post('/api/pgr/register', async (req, res) => {
+  try {
+    // Use form-data package to create FormData
+    const FormData = require('form-data');
+    const formData = new FormData();
+    
+    // Append all fields from request body
+    Object.keys(req.body).forEach(key => {
+      const value = req.body[key];
+      if (value !== undefined && value !== null && value !== '') {
+        // Handle image uploads (base64 data URI)
+        if (key === 'Comp_Image' && typeof value === 'string' && value.startsWith('data:')) {
+          // Convert base64 data URI to buffer
+          const base64Data = value.split(',')[1] || value;
+          const buffer = Buffer.from(base64Data, 'base64');
+          formData.append(key, buffer, {
+            filename: 'complaint.jpg',
+            contentType: 'image/jpeg',
+          });
+        } else {
+          formData.append(key, String(value));
+        }
+      }
+    });
+
+    const response = await fetch(`${PGR_BASE_URL}/register`, {
+      method: 'POST',
+      body: formData,
+      headers: formData.getHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return res.status(response.status).json({ error: errorText || 'Failed to register complaint' });
+    }
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    console.error('PGR proxy error:', error);
+    res.status(500).json({ error: 'Failed to register complaint' });
+  }
+});
+
 
 app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`API server running on port ${PORT}`);

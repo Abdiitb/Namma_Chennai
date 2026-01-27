@@ -351,6 +351,21 @@ export const GCC_ONLINE_SERVICES: GccOnlineService[] = [
       },
     ],
   },
+  {
+    title: 'Public Grievance & Redressal',
+    slug: 'public-grievance-redressal',
+    gccUrl: 'https://gccservices.in/pgr/registercomplaints',
+    description: 'Register and track complaints with GCC',
+    icon: 'document-text-outline',
+    color: '#016ACD',
+    modules: [
+      {
+        title: 'Register Complaint',
+        slug: 'register-complaint',
+        gccUrl: 'https://gccservices.in/pgr/registercomplaints',
+      },
+    ],
+  },
 ];
 
 export function getGccOnlineServiceBySlug(slug: string) {
